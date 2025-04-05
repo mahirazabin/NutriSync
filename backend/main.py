@@ -5,13 +5,13 @@ from urllib.parse import urlparse
 
 load_dotenv()
 
+print("DB URL:", os.getenv('DATABASE_URL'))  # Debug line
+
 try:
-    # Parse the URL
     result = urlparse(os.getenv('DATABASE_URL'))
 
-    # Extract connection parameters
     conn = psycopg2.connect(
-        dbname=result.path[1:],  # Remove leading '/' from path
+        dbname=result.path[1:],
         user=result.username,
         password=result.password,
         host=result.hostname,
@@ -20,14 +20,10 @@ try:
 
     print("Connected to the database successfully!")
 
-    # Create a cursor object
     cursor = conn.cursor()
-
-    # Execute a simple query
-    cursor.execute("SELECT * from Admin;")
+    cursor.execute("SELECT * FROM admin;")
     print(cursor.fetchone())
 
-    # Close the connection
     cursor.close()
     conn.close()
 
