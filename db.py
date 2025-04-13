@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 import psycopg2
 from urllib.parse import urlparse
 
-from classes.ingredient import Ingredient
-
 load_dotenv()
 
 def get_connection():
@@ -43,7 +41,7 @@ def get_user(userid):
     return [1]
 
 
-def create_ingredient(ingred, userID):
+def create_ingredient(name , calories, unit, userID):
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -54,7 +52,7 @@ def create_ingredient(ingred, userID):
                 INSERT INTO ingredient (name, calories, unit, moderatorid)
                 VALUES (%s, %s, %s, %s);
             """
-            cursor.execute(query, (ingred[1], ingred[2], ingred[3], userID))
+            cursor.execute(query, (name, calories, unit, userID))
         else:
             print("Access Denied: User is not an admin")
         conn.commit()
@@ -78,7 +76,7 @@ def view_ingredient(ingredientID):
         result = cursor.fetchone()
         cursor.close()
         conn.close()
-        return Ingredient(result[0], result[1], result[2], result[3], result[4])
+        return result
     except Exception as e:
         print(f"View Ingredient Error: {e}")
     
