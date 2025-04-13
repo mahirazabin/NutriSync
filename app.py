@@ -31,11 +31,11 @@ def recipe_page(recipe_id):
     else:
         return render_template("404.html"), 404
 
-@app.route("/test/<int:ingredientid>")
-def test(ingredientid):
-    # print(db.view_ingredient(ingredientid))
-    # print(db.delete_ingredient(ingredientid))
-    # db.create_ingredient("Test Ingredient", 500, "100 grams", 1)
+@app.route("/test/<int:categoryid>")
+def test(categoryid):
+    print(db.view_category(categoryid))
+    print(db.delete_category(categoryid, 1))
+    db.create_category("Test Category", 1)
     
     return render_template("index.html", image=get_default_picture())
 

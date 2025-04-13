@@ -124,10 +124,11 @@ def create_category(name , userID):
         cursor = conn.cursor()
 
         user = get_user(userID)
+        print(type(user))
         if user[-1] == 1:
             query = """
                 INSERT INTO category (name, moderatorid)
-                VALUES (%s, %s, %s, %s);
+                VALUES (%s, %s);
             """
             cursor.execute(query, (name, userID))
         else:
@@ -136,8 +137,7 @@ def create_category(name , userID):
         cursor.close()
         conn.close()
     except Exception as e:
-        print(f"Create Ingredient Error: {e}")
-        return None
+        print(f"Create Category Error: {e}")
     
 def delete_category(categoryID, userID):
     try:
