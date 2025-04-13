@@ -22,8 +22,7 @@ def search_recipe(recipe_id):
         cursor = conn.cursor()
         query = """
             SELECT recipeid, title, description, timestamp, servingsize, 
-                   totalcalories, caloriesperserving, adderid, 
-                   approved_modid, approved_status
+                   totalcalories, adderid, approved_modid, approved_status, image_url
             FROM Recipe
             WHERE RecipeID = %s;
         """
