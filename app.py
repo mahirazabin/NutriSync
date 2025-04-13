@@ -33,9 +33,9 @@ def recipe_page(recipe_id):
 
 @app.route("/test/<int:ingredientid>")
 def test(ingredientid):
-    print(db.view_ingredient(ingredientid))
-    print(db.delete_ingredient(ingredientid))
-    db.create_ingredient("Test Ingredient", 500, "100 grams", 1)
+    # print(db.view_ingredient(ingredientid))
+    # print(db.delete_ingredient(ingredientid))
+    # db.create_ingredient("Test Ingredient", 500, "100 grams", 1)
     
     return render_template("index.html", image=get_default_picture())
 
