@@ -6,8 +6,8 @@
 <body>
   <h1>{{ recipe.Title }}</h1>
   <p>{{ recipe.Description }}</p>
-  <p>Calories per serving: {{ recipe.CaloriesPerServing }}</p>
   <p>Total calories: {{ recipe.TotalCalories }}</p>
   <p>Serving size: {{ recipe.Serving_Size }}</p>
+  <p><img src="data: image/png;base64,{{ recipe.Picture }}" alt="Image"></p>
 </body>
 </html>
