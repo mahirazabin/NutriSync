@@ -15,6 +15,129 @@ def get_connection():
         port=result.port
     )
     
+def create_user(name, email, phone_no, password, aid, user_flag):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO "user" (name, email, phone_no, password, aid, userflag)
+            VALUES (%s, %s, %s, %s, %s, %s);
+        """
+        cursor.execute(query, (name, email, phone_no, password, aid, user_flag))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Create User Error: {e}")
+
+def get_user(userid):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT userid, name, email, phone_no, password, aid, userflag
+            FROM "user"
+            WHERE userid = %s;
+        """
+        cursor.execute(query, (userid,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get User Error: {e}")
+        return None
+    
+def get_users_by_role(role):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT userid, name, email, phone_no, aid
+            FROM "user"
+            WHERE userflag = %s;
+        """
+        cursor.execute(query, (role,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Users by Role Error: {e}")
+        return []
+
+
+def delete_user(userid):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "DELETE FROM \"user\" WHERE userid = %s;"
+        cursor.execute(query, (userid,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Delete User Error: {e}")
+
+def authenticate_user(email, password):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT userid, name, email, phone_no, password, aid, userflag
+            FROM "user"
+            WHERE email = %s AND password = %s;
+        """
+        cursor.execute(query, (email, password))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Authentication Error: {e}")
+        return None   
+    
+def update_user_info(userid, name=None, email=None, phone_no=None, password=None):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        updates = []
+        params = []
+
+        if name:
+            updates.append("name = %s")
+            params.append(name)
+        if email:
+            updates.append("email = %s")
+            params.append(email)
+        if phone_no:
+            updates.append("phone_no = %s")
+            params.append(phone_no)
+        if password:
+            updates.append("password = %s")
+            params.append(password)
+
+        if not updates:
+            print("No fields provided to update.")
+            return False
+
+        query = f"""
+            UPDATE "user"
+            SET {', '.join(updates)}
+            WHERE userid = %s;
+        """
+        params.append(userid)
+
+        cursor.execute(query, tuple(params))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Update User Info Error: {e}")
+        return False
+
     
 def search_recipe(recipe_id):
     try:
@@ -35,11 +158,6 @@ def search_recipe(recipe_id):
     except Exception as e:
         print(f"Search Recipe Error: {e}")
         return None
-    
-def get_user(userid):
-    # placeholder function to get the user from their userid
-    return [1]
-
 
 def create_ingredient(name , calories, unit, userID):
     try:
