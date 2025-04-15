@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template
-from db import search_recipe
+import db
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 @app.route("/")
