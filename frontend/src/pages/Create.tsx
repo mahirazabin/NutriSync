@@ -54,7 +54,7 @@ const CreateRecipe: React.FC = () => {
         <br /><br />
         <input
           type="text"
-          placeholder="Selection of categoRy"
+          placeholder="Selection of category"
           value={ingredients}
           onChange={(e) => setCategory(e.target.value)}
           required

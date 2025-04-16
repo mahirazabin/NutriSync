@@ -1,13 +1,14 @@
 import React from 'react';
 import LoginPage from './pages/Login';
-import CreateRecipe from './pages/createRecipe';
+import Create from './pages/Create';
 
 function App() {
   return <LoginPage />;
 }
 
-function createRecipe() {
-  return <CreateRecipe />;
+function CreateRecipe() {
+  return <Create />;
 }
 
 export default App;
+export { CreateRecipe };
