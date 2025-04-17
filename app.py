@@ -9,6 +9,12 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
+
+def get_default_picture():
+    with open("images/default_recipe.png", "rb") as image_file:
+        binary_data = image_file.read()
+        return base64.b64encode(binary_data).decode("utf-8")
+
 @app.route("/")
 def home():
     return render_template("index.html")
