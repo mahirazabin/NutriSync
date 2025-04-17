@@ -128,8 +128,45 @@ def create_ingredient_api():
 @app.route('/api/ingredient/<int:ingredient_id>', methods=['DELETE'])
 def delete_ingredient_api(ingredient_id):
     try:
-        db.delete_ingredient(ingredient_id)
+        db.delete_ingredient(ingredient_id, 123)
         return jsonify({'message': 'Ingredient deleted'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+    
+# List all categories
+@app.route('/api/categories')
+def list_categories():
+    rows = db.get_all_categories()
+    categories = [
+        {
+            'categoryID': row[0],
+            'name': row[1],
+            'moderatorID': row[2]
+        } for row in rows
+    ]
+    return jsonify(categories)
+
+# Create a new category
+@app.route('/api/category', methods=['POST'])
+def create_category_api():
+    data = request.get_json() or {}
+    name = data.get('name')
+    moderator_id = data.get('moderatorID')
+    if not all([name, isinstance(moderator_id, int)]):
+        return jsonify({'error': 'Missing name or moderatorID'}), 400
+    try:
+        db.create_category(name, moderator_id)
+        return jsonify({'message': 'Category created'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Delete a category
+@app.route('/api/category/<int:category_id>', methods=['DELETE'])
+def delete_category_api(category_id):
+    try:
+        db.delete_category(category_id, 123)
+        return jsonify({'message': 'Category deleted'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     

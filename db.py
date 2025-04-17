@@ -321,15 +321,22 @@ def delete_ingredient(ingredientID, userID):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        user = get_user(userID)
-        if user[-1] == 1:
-            query = """
+        
+        # For testing...
+        # user = get_user(userID)
+        # if user[-1] == 1:
+        #     query = """
+        #         DELETE FROM ingredient
+        #         WHERE ingredientid = %s;
+        #     """
+        #     cursor.execute(query, (ingredientID,))
+        # else:
+        #     print("Access Denied: User is not an admin")
+        query = """
                 DELETE FROM ingredient
                 WHERE ingredientid = %s;
             """
-            cursor.execute(query, (ingredientID,))
-        else:
-            print("Access Denied: User is not an admin")
+        cursor.execute(query, (ingredientID,))
         conn.commit()
         cursor.close()
         conn.close()
@@ -355,21 +362,47 @@ def view_recipe_ingredient(recipeID):
     except Exception as e:
         print(f"View Recipe Ingredient Error: {e}")
 
+
+def get_all_categories():
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT categoryID, name, moderatorID
+            FROM Category;
+            """
+        )
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return rows 
+    except Exception as e:
+        print(f"get_all_categories Error: {e}")
+        return []
+
 def create_category(name , userID):
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
-        user = get_user(userID)
-        print(type(user))
-        if user[-1] == 1:
-            query = """
+        # Testing.......
+        # user = get_user(userID)
+        # print(type(user))
+        # if user[-1] == 1:
+        #     query = """
+        #         INSERT INTO category (name, moderatorid)
+        #         VALUES (%s, %s);
+        #     """
+        #     cursor.execute(query, (name, userID))
+        # else:
+        #     print("Access Denied: User is not an admin")
+        
+        query = """
                 INSERT INTO category (name, moderatorid)
                 VALUES (%s, %s);
             """
-            cursor.execute(query, (name, userID))
-        else:
-            print("Access Denied: User is not an admin")
+        cursor.execute(query, (name, userID))
         conn.commit()
         cursor.close()
         conn.close()
@@ -380,15 +413,22 @@ def delete_category(categoryID, userID):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        user = get_user(userID)
-        if user[-1] == 1:
-            query = """
+        
+        # Testing...
+        # user = get_user(userID)
+        # if user[-1] == 1:
+        #     query = """
+        #         DELETE FROM category
+        #         WHERE categoryid = %s;
+        #     """
+        #     cursor.execute(query, (categoryID,))
+        # else:
+        #     print("Access Denied: User is not an admin")
+        query = """
                 DELETE FROM category
                 WHERE categoryid = %s;
             """
-            cursor.execute(query, (categoryID,))
-        else:
-            print("Access Denied: User is not an admin")
+        cursor.execute(query, (categoryID,))
         conn.commit()
         cursor.close()
         conn.close()
