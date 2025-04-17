@@ -56,16 +56,48 @@ def recipe_api(recipe_id):
         }
         return jsonify(recipe), 200
     else:
-        return jsonify({"message": "Recipe not found"}), 404
+        return jsonify({"message": "Recipe not found"})
 
+@app.route("/admin/<int:admin_id>", methods=["GET"])
+def admin_page(admin_id):
+    analytics = db.admin_analytics_past_30_days()
+    # TODO: make a display chart stuff for analytics
+    admin = db.get_admin_by_id(admin_id)
+    admin_name = admin[0]   
+    # pass everything to frontend
 
-@app.route("/test/<int:categoryid>")
-def test(categoryid):
-    print(db.view_category(categoryid))
-    print(db.delete_category(categoryid, 1))
-    db.create_category("Test Category", 1)
-    
-    return render_template("index.html", image=get_default_picture())
+@app.route("/admin/manage-member/", methods=["GET"])
+def view_all_members():
+    members = db.view_all_members()
+    if members:
+        members_json = []
+        for member in members:
+            x = {
+                "userID": member[0],
+                "name": member[1],
+                "email": member[2]
+            }
+            members_json.append(x)
+        return jsonify(members_json)
+    else:
+        return jsonify({"message": "No Members Found"})
+
+@app.route("/admin/manage-moderator/", methods=["GET"])
+def view_all_moderators():
+    moderators = db.view_all_moderators()
+    if moderators:
+        moderator_json = []
+        for moderator in moderators:
+            x = {
+                "userID": moderator[0],
+                "name": moderator[1],
+                "email": moderator[2]
+            }
+            moderator_json.append(x)
+        return jsonify(moderator_json)
+    else:
+        return jsonify({"message": "No Members Found"})    
+
 
 if __name__ == "__main__":
     app.run(debug=True)

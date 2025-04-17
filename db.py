@@ -323,8 +323,10 @@ def view_category(categoryID):
             WHERE CategoryID = %s;
         """
         cursor.execute(query, (categoryID,))
-        print(f"Select Ingredients Error: {e}")
-        return None
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
     except Exception as e:
         print(f"View Category Error: {e}")
 
@@ -438,3 +440,92 @@ def like_recipe(user_id, recipe_id):
         conn.close()
     except Exception as e:
         print(f"Like Recipe Error: {e}")
+
+def view_all_members():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT userid, name, email FROM "User"
+            WHERE userflag = 0;
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"View All Members Error: {e}")
+
+def view_all_moderators():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT * FROM "User"
+            WHERE userflag = 1;
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"View All Members Error: {e}")
+
+def admin_analytics_past_30_days():
+    try:
+        counts = { "recipes" : 0, "ingredients" : 0, "categories" : 0, "users" : 0 }
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT COUNT(*) FROM Recipe
+            WHERE timestamp >= NOW() - INTERVAL '30 days';
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["recipes"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM Ingredients
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["ingredients"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM Ingredients
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["categories"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM \"User\"
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["users"] = result[0]
+
+        cursor.close()
+        conn.close()
+        return counts
+    except Exception as e:
+        print(f"New Recipes Past 30 Days Error: {e}")
+
+def get_admin_by_id(admin_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT name, email, password
+            FROM Admin
+            WHERE adminid = %s;
+        """
+        cursor.execute(query, (admin_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Admin by ID Error: {e}")
