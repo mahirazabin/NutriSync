@@ -12,7 +12,7 @@ def home():
 
 
 @app.route('/api/recipes/pending')
-def list_recipes():
+def list_pending_recipes():
     rows = db.list_all_pending_recipes()
 
     recipes = [{
@@ -91,6 +91,47 @@ def reject_recipe_api(recipe_id):
         return jsonify({ 'message': 'Recipe rejected and deleted', 'RecipeID': recipe_id }), 200
     except Exception as e:
         return jsonify({ 'error': str(e) }), 500
+    
+    
+# List all ingredients
+@app.route('/api/ingredients')
+def list_ingredients():
+    rows = db.get_all_ingredients()
+    ingredients = [
+        {
+            'ingredientID': row[0],
+            'name': row[1],
+            'calories': row[2],
+            'unit': row[3],
+            'moderatorID': row[4]
+        } for row in rows
+    ]
+    return jsonify(ingredients)
+
+# Create a new ingredient
+@app.route('/api/ingredient', methods=['POST'])
+def create_ingredient_api():
+    data = request.get_json() or {}
+    name = data.get('name')
+    calories = data.get('calories')
+    unit = data.get('unit')
+    moderator_id = 123 # Placeholder
+    if not all([name, isinstance(calories, int), moderator_id]):
+        return jsonify({'error': 'Missing name, calories, or moderatorID'}), 400
+    try:
+        db.create_ingredient(name, calories, unit or '', moderator_id)
+        return jsonify({'message': 'Ingredient created'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# Delete an ingredient
+@app.route('/api/ingredient/<int:ingredient_id>', methods=['DELETE'])
+def delete_ingredient_api(ingredient_id):
+    try:
+        db.delete_ingredient(ingredient_id)
+        return jsonify({'message': 'Ingredient deleted'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
     
 @app.route("/test/<int:categoryid>")
 def test(categoryid):

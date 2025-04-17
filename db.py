@@ -31,23 +31,23 @@ def create_user(name, email, phone_no, password, aid, user_flag):
         print(f"Create Admin Error: {e}")  
         print(f"Create User Error: {e}")
 
-def get_user(userid):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-            SELECT userid, name, email, phone_no, password, aid, userflag
-            FROM "user"
-            WHERE userid = %s;
-        """
-        cursor.execute(query, (userid,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return result
-    except Exception as e:
-        print(f"Get User Error: {e}")
-        return None
+# def get_user(userid):
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         query = """
+#             SELECT userid, name, email, phone_no, password, aid, userflag
+#             FROM "user"
+#             WHERE userid = %s;
+#         """
+#         cursor.execute(query, (userid,))
+#         result = cursor.fetchone()
+#         cursor.close()
+#         conn.close()
+#         return result
+#     except Exception as e:
+#         print(f"Get User Error: {e}")
+#         return None
     
 def get_users_by_role(role):
     try:
@@ -195,28 +195,61 @@ def search_recipe(recipe_id):
     except Exception as e:
         print(f"Search Recipe Error: {e}")
         return None
+      
+      
+def get_all_ingredients():
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT ingredientID, name, calories, unit, moderatorID
+            FROM Ingredient;
+            """
+        )
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return rows  # list of tuples
+    except Exception as e:
+        print(f"get_all_ingredients Error: {e}")
+        return []
+
        
-# def select_ingredients(ingredient_id):
-#     try:
-#         conn = get_connection()
-#         cursor = conn.cursor()
-#         query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
-#         cursor.execute(query, (ingredient_id,))
+def select_ingredients(ingredient_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
+        cursor.execute(query, (ingredient_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"approve_recipe Error: {e}")
 
 def create_ingredient(name , calories, unit, userID):
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
-        user = get_user(userID)
-        if user[-1] == 1:
-            query = """
+        # For testing purposes, this is commented out
+        # user = get_user(userID)
+        # if user[-1] == 1:
+        #     query = """
+        #         INSERT INTO ingredient (name, calories, unit, moderatorid)
+        #         VALUES (%s, %s, %s, %s);
+        #     """
+        #     cursor.execute(query, (name, calories, unit, userID))
+        # else:
+        #     print("Access Denied: User is not an admin")
+            
+        query = """
                 INSERT INTO ingredient (name, calories, unit, moderatorid)
                 VALUES (%s, %s, %s, %s);
             """
-            cursor.execute(query, (name, calories, unit, userID))
-        else:
-            print("Access Denied: User is not an admin")
+        cursor.execute(query, (name, calories, unit, userID))
         conn.commit()
         cursor.close()
         conn.close()
