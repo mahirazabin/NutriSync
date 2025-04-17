@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/Login';
-import AdminHome from './pages/homePages/AdminHome';
-import MemberHome from './pages/homePages/MemberHome';
-import ModeratorHome from './pages/homePages/ModeratorHome';
+import AdminHome from './pages/Admin/AdminHome';
+import ManageMember from './pages/Admin/ManageMember';
+import MemberHome from './pages/Member/MemberHome';
+import ModeratorHome from './pages/Moderator/ModeratorHome';
 
-import Create from './pages/Create';
-import Admin from './pages/Admin';
+import Create from './pages/Member/CreateRecipes';
 
 function App() {
   return (
@@ -14,21 +14,16 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/member" element={<MemberHome />} />
+        <Route path="/member/recipe/create" element={<Create />} />
         <Route path="/moderator" element={<ModeratorHome />} />
         <Route path="/admin" element={<AdminHome />} />
+        <Route path="/admin/manage-member" element={<ManageMember />} />
+        <Route path="/admin/manage-moderator" element={<ManageMember />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
-function CreateRecipe() {
-  return <Create />;
-}
-
-function AdminHome(){
-  return <Admin />;
-}
-
 export default App;
-export { CreateRecipe };
+export { Create };
 export { AdminHome };
