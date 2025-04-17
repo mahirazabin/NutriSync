@@ -1,28 +1,55 @@
-from flask import Flask, request, render_template
-from db import search_recipe
+from flask import Flask, jsonify, request, render_template
+import db
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-@app.route("/recipes/<int:recipe_id>")
+
+@app.route('/api/recipes/pending')
+def list_recipes():
+    rows = db.list_all_pending_recipes()
+
+    recipes = [{
+        'RecipeID':        row[0],
+        'Title':           row[1],
+        'Description':     row[2],
+        'TimeStamp':       row[3].isoformat() if hasattr(row[3], 'isoformat') else row[3],
+        'Serving_Size':    row[4],
+        'TotalCalories':   row[5],
+        'AdderID':         row[6],
+        'Approved_ModID':  row[7],
+        'Approved_Status': bool(row[8]),
+        'ImageURL':        row[9],
+    } for row in rows]
+
+    return jsonify(recipes)
+
+
+@app.route("/api/recipes/<int:recipe_id>")
 def recipe_page(recipe_id):
     result = db.search_recipe(recipe_id)
-    if result:
-        recipe = {
-            "RecipeID": result[0],
-            "Title": result[1],
-            "Description": result[2],
-            "TimeStamp": result[3],
-            "Serving_Size": result[4],
-            "TotalCalories": result[5],
-            "AdderID": result[6],
-            "Approved_ModID": result[7],
-            "Approved_Status": result[8],
-            "ImageURL": result[9]
-        }
-        return render_template("recipe.html", recipe=recipe)
+    if not result:
+        return jsonify({"error": "not found"}), 404
+    
+    recipe = {
+        "RecipeID": result[0],
+        "Title": result[1],
+        "Description": result[2],
+        "TimeStamp": result[3],
+        "Serving_Size": result[4],
+        "TotalCalories": result[5],
+        "AdderID": result[6],
+        "Approved_ModID": result[7],
+        "Approved_Status": result[8],
+        "ImageURL": result[9]
+    }
+    return jsonify(recipe)
 
     
 @app.route("/api/recipes/<int:recipe_id>", methods=["GET"])
@@ -44,14 +71,34 @@ def recipe_api(recipe_id):
     else:
         return jsonify({"message": "Recipe not found"}), 404
 
+@app.route('/api/recipe/<int:recipe_id>/approve', methods=['POST'])
+def approve_recipe_api(recipe_id):
+    mod_id = 123   # Placeholder
+    try:
+        db.approve_recipe(recipe_id, mod_id)
+        return jsonify({ 'message': 'Recipe approved', 'RecipeID': recipe_id }), 200
+    except Exception as e:
+        app.logger.exception("Error approving recipe")   
+        return jsonify({ 'error': str(e) }), 500
 
+@app.route('/api/recipe/<int:recipe_id>/reject', methods=['POST'])
+def reject_recipe_api(recipe_id):
+    """
+    Reject (delete) a pending recipe.
+    """
+    try:
+        db.reject_recipe(recipe_id)
+        return jsonify({ 'message': 'Recipe rejected and deleted', 'RecipeID': recipe_id }), 200
+    except Exception as e:
+        return jsonify({ 'error': str(e) }), 500
+    
 @app.route("/test/<int:categoryid>")
 def test(categoryid):
     print(db.view_category(categoryid))
     print(db.delete_category(categoryid, 1))
     db.create_category("Test Category", 1)
     
-    return render_template("index.html", image=get_default_picture())
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

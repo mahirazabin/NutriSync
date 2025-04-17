@@ -156,7 +156,27 @@ def update_admin(admin_id, name, email, password):
     except Exception as e:
         print(f"Update Admin Error: {e}")
 
-   
+
+def list_all_pending_recipes():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT
+              recipeid, title, description, timestamp, servingsize, 
+              totalcalories, adderid, approved_modid, approved_status, image_url
+            FROM Recipe
+            WHERE Approved_Status = FALSE;
+        """)                       
+        rows = cursor.fetchall()   
+        cursor.close()
+        conn.close()
+        return rows               
+    except Exception as e:
+        print(f"list_all_recipes Error: {e}")
+        return []  
+ 
 def search_recipe(recipe_id):
     try:
         conn = get_connection()
@@ -176,12 +196,12 @@ def search_recipe(recipe_id):
         print(f"Search Recipe Error: {e}")
         return None
        
-def select_ingredients(ingredient_id):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
-        cursor.execute(query, (ingredient_id,))
+# def select_ingredients(ingredient_id):
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
+#         cursor.execute(query, (ingredient_id,))
 
 def create_ingredient(name , calories, unit, userID):
     try:
@@ -223,13 +243,46 @@ def view_ingredient(ingredientID):
         print(f"Select Ingredients Error: {e}")
         return None
 
-def select_category(category_id):
+
+# Approve a recipe by setting Approved_Status = TRUE
+def approve_recipe(recipe_id: int, approved_mod_id: int) -> None:
     try:
         conn = get_connection()
-        cursor = conn.cursor()
-        query = "SELECT Name FROM Category WHERE CategoryID = %s;"
-        cursor.execute(query, (category_id,))
-        print(f"View Ingredient Error: {e}")
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE Recipe
+            SET Approved_ModID = %s,
+                Approved_Status = TRUE
+            WHERE RecipeID = %s;
+        """, (approved_mod_id, recipe_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"approve_recipe Error: {e}")
+
+# Reject (delete) a recipe
+def reject_recipe(recipe_id: int) -> None:
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM Recipe WHERE RecipeID = %s;",
+            (recipe_id,)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"reject_recipe Error: {e}")
+
+# def select_category(category_id):
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         query = "SELECT Name FROM Category WHERE CategoryID = %s;"
+#         cursor.execute(query, (category_id,))
+#         print(f"View Ingredient Error: {e}")
     
 def delete_ingredient(ingredientID, userID):
     try:
@@ -328,8 +381,8 @@ def view_category(categoryID):
         print(f"Select Category Error: {e}")
         return None
 
-def approve_recipe(recipe_id, approved_mod_id, approved_status):
-        print(f"View Category Error: {e}")
+# def approve_recipe(recipe_id, approved_mod_id, approved_status):
+#         print(f"View Category Error: {e}")
 
 def view_recipe_category(recipeID):
     try:
