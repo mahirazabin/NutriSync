@@ -1,7 +1,11 @@
 import base64
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import db as db
 app = Flask(__name__, template_folder='templates', static_folder='static')
+
+
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 def get_default_picture():
     with open("images/default_recipe.png", "rb") as image_file:
@@ -30,6 +34,26 @@ def recipe_page(recipe_id):
         return render_template("recipe.html", recipe=recipe)
     else:
         return render_template("404.html"), 404
+    
+@app.route("/api/recipes/<int:recipe_id>", methods=["GET"])
+def recipe_api(recipe_id):
+    result = db.search_recipe(recipe_id)
+    if result:
+        recipe = {
+            "RecipeID": result[0],
+            "Title": result[1],
+            "Description": result[2],
+            "TimeStamp": result[3],
+            "Serving_Size": result[4],
+            "TotalCalories": result[5],
+            "AdderID": result[7],
+            "Approved_ModID": result[8],
+            "Approved_Status": result[9]
+        }
+        return jsonify(recipe), 200
+    else:
+        return jsonify({"message": "Recipe not found"}), 404
+
 
 @app.route("/test/<int:categoryid>")
 def test(categoryid):
