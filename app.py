@@ -98,8 +98,26 @@ def view_all_moderators(id):
             moderator_json.append(x)
         return jsonify(moderator_json)
     else:
-        return jsonify([{"userID": "No Active Moderators", "name": "-", "email": "example@email.com"}])  
-
-
+        return jsonify([{"userID": "No Active Moderators", "name": "-", "email": "example@email.com"}]) 
+ 
+@app.route("/api/admin/<int:id>/<string:action>", methods=["POST"])
+def manage_user(id, action):
+    data = request.get_json()
+    user_id = data.get("user_ids")
+    print(user_id)
+    if action == "assign":
+        for uid in user_id:
+            db.assign_member(uid, id)
+        return jsonify({"message": "User approved successfully"})
+    elif action == "blacklist":
+        for uid in user_id:
+            db.ban_user(uid, id)
+        return jsonify({"message": "User banned successfully"})
+    elif action == "unassign":
+        for uid in user_id:
+            db.unassign_moderator(uid, id)
+        return jsonify({"message": "User unbanned successfully"})
+    else:
+        return jsonify({"message": "Invalid action"}), 400
 if __name__ == "__main__":
     app.run(debug=True)

@@ -529,3 +529,66 @@ def get_admin_by_id(admin_id):
         return result
     except Exception as e:
         print(f"Get Admin by ID Error: {e}")
+
+def assign_member(user_id, admin_id):
+    try:
+        if get_admin_by_id(admin_id) is not None:
+            conn = get_connection()
+            cursor = conn.cursor()
+            query = """
+                UPDATE "User"
+                SET userflag = 2
+                WHERE userid = %s;
+            """
+            cursor.execute(query, (user_id,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            print("User assigned successfully")
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"Assign Moderator Error: {e}")
+        return False
+
+def unassign_moderator(user_id, admin_id):
+    try:
+        if get_admin_by_id(admin_id) is not None:
+            conn = get_connection()
+            cursor = conn.cursor()
+            query = """
+                UPDATE "User"
+                SET userflag = 1
+                WHERE userid = %s;
+            """
+            cursor.execute(query, (user_id,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"Unassign Moderator Error: {e}")
+        return False
+    
+def ban_user(user_id, admin_id):
+    try:
+        if get_admin_by_id(admin_id) is not None:
+            conn = get_connection()
+            cursor = conn.cursor()
+            query = """
+                DELETE FROM "User"
+                WHERE userid = %s;
+            """
+            cursor.execute(query, (user_id,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+        else:
+            print("Acccess Denied")
+            return False
+    except Exception as e:
+        print(f"Ban User Error: {e}")
