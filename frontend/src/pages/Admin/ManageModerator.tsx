@@ -15,9 +15,6 @@ const ManageMember: React.FC = () => {
           <button className="rounded-full border-2 px-6 py-3 text-sm font-medium hover:bg-gray-100">
             Unassign Moderator
           </button>
-          <button className="rounded-full border-2 px-6 py-3 text-sm font-medium hover:bg-gray-100">
-            Assign Moderator
-          </button>
         </div>
       </div>
     </div>

@@ -13,10 +13,7 @@ const ManageMember: React.FC = () => {
             blacklist members
           </button>
           <button className="rounded-full border-2 px-6 py-3 text-sm font-medium hover:bg-gray-100">
-            view member details
-          </button>
-          <button className="rounded-full border-2 px-6 py-3 text-sm font-medium hover:bg-gray-100">
-            view member analytics
+            Assign Moderator
           </button>
         </div>
       </div>
