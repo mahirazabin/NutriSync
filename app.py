@@ -53,6 +53,50 @@ def recipe_api(recipe_id):
         return jsonify(recipe), 200
     else:
         return jsonify({"message": "Recipe not found"})
+# -------------------------------------------------- RECIPES --------------------------------------------------
+@app.route("/api/member/<int:id>/ingredient", methods=["GET"])
+def get_ingredients(id):
+    ingredients = db.get_all_ingredient()
+    print(ingredients)
+    if ingredients:
+        ingredients_json = []
+        for ingredient in ingredients:
+            ingredients_json.append(ingredient[1])
+        return jsonify(ingredients_json)
+    else:
+        return jsonify([{"message": "No Ingredients Found"}])
+
+@app.route("/api/member/<int:id>/category", methods=["GET"])
+def get_categories(id):
+    categories = db.get_all_category()
+    print(categories)
+    if categories:
+        categories_json = []
+        for category in categories:
+            categories_json.append(category[1])
+        return jsonify(categories_json)
+    else:
+        return jsonify([{"message": "No Categories Found"}])
+    
+@app.route("/api/member/<int:id>/add-recipe", methods=["POST"])
+def add_recipe(id):
+    data = request.get_json()
+    title = data.get("title")
+    descriptions = data.get("description")
+    servings = data.get("servingSize")
+    ingredients = data.get("ingredient")
+    categories = data.get("category")
+    image_url = data.get("imageURL")
+
+    # TODO: get the ingredient amount, ingredient_id, and category_id from the database
+
+    db.create_recipe(title, descriptions,servings,0,categories, id, image_url)
+    for ingredient in ingredients:
+        db.add_recipe_ingredient(title, ingredient)
+    for category in categories:
+        db.add_recipe_category(title, category)
+
+# -------------------------------------------------- ADMIN --------------------------------------------------
 
 @app.route("/api/admin/<int:admin_id>", methods=["GET"])
 def admin_page(admin_id):
