@@ -7,6 +7,7 @@ import MemberHome from './pages/Member/MemberHome';
 import ModeratorHome from './pages/Moderator/ModeratorHome';
 
 import Create from './pages/Member/CreateRecipes';
+import ManageModerator from './pages/Admin/ManageModerator';
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
         <Route path="/moderator/" element={<ModeratorHome />} />
         <Route path="/admin/:id" element={<AdminHome />} />
         <Route path={`/admin/:id/manage-member/`} element={<ManageMember />} />
-        <Route path={`/admin/:id/manage-moderator/`} element={<ManageMember />} />
+        <Route path={`/admin/:id/manage-moderator/`} element={<ManageModerator />} />
       </Routes>
     </BrowserRouter>
   );

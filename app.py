@@ -69,7 +69,7 @@ def admin_page(admin_id):
         return jsonify({"adminName": "None", "analytics": "None"})
 
 @app.route("/api/admin/<int:id>/manage-member/", methods=["GET"])
-def view_all_members():
+def view_all_members(id):
     members = db.view_all_members()
     if members:
         members_json = []
@@ -82,10 +82,10 @@ def view_all_members():
             members_json.append(x)
         return jsonify(members_json)
     else:
-        return jsonify({"message": "No Members Found"})
+        return jsonify([{"userID": "No Active Members", "name": "—", "email": "example@email.com"}])
 
 @app.route("/api/admin/<int:id>/manage-moderator/", methods=["GET"])
-def view_all_moderators():
+def view_all_moderators(id):
     moderators = db.view_all_moderators()
     if moderators:
         moderator_json = []
@@ -98,7 +98,7 @@ def view_all_moderators():
             moderator_json.append(x)
         return jsonify(moderator_json)
     else:
-        return jsonify({"message": "No Members Found"})    
+        return jsonify([{"userID": "No Active Moderators", "name": "-", "email": "example@email.com"}])  
 
 
 if __name__ == "__main__":

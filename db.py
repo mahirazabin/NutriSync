@@ -447,7 +447,7 @@ def view_all_members():
         cursor = conn.cursor()
         query = """
             SELECT userid, name, email FROM "User"
-            WHERE userflag = 0;
+            WHERE userflag = 1;
         """
         cursor.execute(query)
         result = cursor.fetchall()
@@ -462,8 +462,8 @@ def view_all_moderators():
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            SELECT * FROM "User"
-            WHERE userflag = 1;
+            SELECT userid, name, email FROM "User"
+            WHERE userflag = 2;
         """
         cursor.execute(query)
         result = cursor.fetchall()
