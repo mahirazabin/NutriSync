@@ -6,10 +6,6 @@ from flask import Flask, request, render_template
 import db
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
-
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
-
-
 def get_default_picture():
     with open("images/default_recipe.png", "rb") as image_file:
         binary_data = image_file.read()
@@ -58,15 +54,21 @@ def recipe_api(recipe_id):
     else:
         return jsonify({"message": "Recipe not found"})
 
-@app.route("/admin/<int:admin_id>", methods=["GET"])
+@app.route("/api/admin/<int:admin_id>", methods=["GET"])
 def admin_page(admin_id):
     analytics = db.admin_analytics_past_30_days()
-    # TODO: make a display chart stuff for analytics
     admin = db.get_admin_by_id(admin_id)
-    admin_name = admin[0]   
-    # pass everything to frontend
+    if admin:
+        admin_name = admin[0]   
+        json_obj = {
+            "adminName": admin_name,
+            "analytics": analytics
+        }
+        return jsonify(json_obj)
+    else:
+        return jsonify({"adminName": "None", "analytics": "None"})
 
-@app.route("/admin/manage-member/", methods=["GET"])
+@app.route("/api/admin/manage-member/", methods=["GET"])
 def view_all_members():
     members = db.view_all_members()
     if members:
@@ -82,7 +84,7 @@ def view_all_members():
     else:
         return jsonify({"message": "No Members Found"})
 
-@app.route("/admin/manage-moderator/", methods=["GET"])
+@app.route("/api/admin/manage-moderator/", methods=["GET"])
 def view_all_moderators():
     moderators = db.view_all_moderators()
     if moderators:

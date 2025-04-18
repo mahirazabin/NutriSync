@@ -487,14 +487,14 @@ def admin_analytics_past_30_days():
         counts["recipes"] = result[0]
 
         query = """
-            SELECT COUNT(*) FROM Ingredients
+            SELECT COUNT(*) FROM Ingredient
         """
         cursor.execute(query)
         result = cursor.fetchone()
         counts["ingredients"] = result[0]
 
         query = """
-            SELECT COUNT(*) FROM Ingredients
+            SELECT COUNT(*) FROM Ingredient
         """
         cursor.execute(query)
         result = cursor.fetchone()

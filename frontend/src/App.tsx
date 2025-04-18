@@ -13,12 +13,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/member" element={<MemberHome />} />
-        <Route path="/member/recipe/create" element={<Create />} />
-        <Route path="/moderator" element={<ModeratorHome />} />
-        <Route path="/admin" element={<AdminHome />} />
-        <Route path="/admin/manage-member" element={<ManageMember />} />
-        <Route path="/admin/manage-moderator" element={<ManageMember />} />
+        <Route path="/member/" element={<MemberHome />} />
+        <Route path="/member/recipe/create/" element={<Create />} />
+        <Route path="/moderator/" element={<ModeratorHome />} />
+        <Route path="/admin/:id" element={<AdminHome />} />
+        <Route path={`/admin/:id/manage-member/`} element={<ManageMember />} />
+        <Route path={`/admin/:id/manage-moderator/`} element={<ManageMember />} />
       </Routes>
     </BrowserRouter>
   );
