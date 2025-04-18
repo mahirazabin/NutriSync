@@ -8,6 +8,10 @@
   <p>{{ recipe.Description }}</p>
   <p>Total calories: {{ recipe.TotalCalories }}</p>
   <p>Serving size: {{ recipe.Serving_Size }}</p>
-  <p><img src="data: image/png;base64,{{ recipe.Picture }}" alt="Image"></p>
+  {% if recipe.ImageURL %}
+    <img src="{{ recipe.ImageURL }}" alt="Recipe Image">
+  {% else %}
+    <p>No image uploaded for this recipe.</p>
+  {% endif %}
 </body>
 </html>

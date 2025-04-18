@@ -1,12 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NutriSync</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h1>Welcome to the best Recipe App</h1>
-  <p>Idk bro</code>.</p>
-  <img src="data: image/png;base64,{{ image }}" alt="Image">
-  
+  <header>
+    <h1>NutriSync</h1>
+    <form method="GET" action="/search" class="search-bar">
+      <input type="text" name="q" placeholder="Search recipes" />
+      <button type="submit">Search</button>
+    </form>
+  </header>
+
+  <main>
+    <section class="categories">
+      <h2>Categories</h2>
+      <div class="category-grid">
+        <a href="/category/quick-meals">Quick Meals</a>
+        <a href="/category/low-calorie">Low Calorie</a>
+        <a href="/category/vegetarian">Vegetarian</a>
+        <a href="/category/desserts">Desserts</a>
+        <a href="/category/family-favorites">Family Favorites</a>
+      </div>
+    </section>
+
+    <section class="featured">
+      <h2>Top Rated Recipes</h2>
+      <div class="recipe-cards">
+        <!-- Will be changed to dynamic display later -->
+        <div class="card">
+          <h3>Pizza</h3>
+          <p>Classic Italian flavor</p>
+          <a href="/recipes/2">View Recipe (This works btw)</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 NutriSync Limited</p>
+  </footer>
 </body>
 </html>

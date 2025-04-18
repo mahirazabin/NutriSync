@@ -15,6 +15,34 @@ def get_connection():
         port=result.port
     )
     
+def create_admin(admin_id, name, email, password):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "INSERT INTO Admin VALUES (%s, %s, %s, %s);"
+        cursor.execute(query, (admin_id, name, email, password))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Create Admin Error: {e}")  
+    
+def update_admin(admin_id, name, email, password):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            UPDATE Admin
+            SET Name = %s, Email = %s, Password = %s
+            WHERE AdminID = %s;
+        """
+        cursor.execute(query, (name, email, password, admin_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Update Admin Error: {e}")
+
 def create_user(name, email, phone_no, password, aid, user_flag):
     try:
         conn = get_connection()
@@ -138,15 +166,14 @@ def update_user_info(userid, name=None, email=None, phone_no=None, password=None
         print(f"Update User Info Error: {e}")
         return False
 
-    
+   
 def search_recipe(recipe_id):
     try:
         conn = get_connection()
         cursor = conn.cursor()
         query = """
             SELECT recipeid, title, description, timestamp, servingsize, 
-                   totalcalories, caloriesperserving, adderid, 
-                   approved_modid, approved_status
+                   totalcalories, adderid, approved_modid, approved_status, image_url
             FROM Recipe
             WHERE RecipeID = %s;
         """
@@ -191,6 +218,15 @@ def view_ingredient(ingredientID):
             WHERE IngredientID = %s;
         """
         cursor.execute(query, (ingredientID,))
+    except Exception as e:
+        print(f"View Ingredient Error: {e}")
+       
+def select_ingredients(ingredient_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
+        cursor.execute(query, (ingredient_id,))
         result = cursor.fetchone()
         cursor.close()
         conn.close()
@@ -287,6 +323,19 @@ def view_category(categoryID):
             WHERE CategoryID = %s;
         """
         cursor.execute(query, (categoryID,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"View Category Error: {e}")
+
+def select_category(category_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "SELECT Name FROM Category WHERE CategoryID = %s;"
+        cursor.execute(query, (category_id,))
         result = cursor.fetchone()
         cursor.close()
         conn.close()
@@ -295,6 +344,24 @@ def view_category(categoryID):
         print(f"View Category Error: {e}")
 
 def view_recipe_category(recipeID):
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            query = """
+                SELECT C.categoryid, C.name, C.moderatorid
+                FROM category_belongs_recipe B
+                JOIN category C ON B.categoryid = C.categoryid
+                WHERE B.recipeid = %s;
+            """
+            cursor.execute(query, (recipeID,))
+            result = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return result
+        except Exception as e:
+            print(f"Select Category Error: {e}")
+
+def approve_recipe(recipe_id, approved_mod_id, approved_status):
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -304,7 +371,7 @@ def view_recipe_category(recipeID):
             JOIN category C ON B.categoryid = C.categoryid
             WHERE B.recipeid = %s;
         """
-        cursor.execute(query, (recipeID,))
+        cursor.execute(query, (recipe_id,))
         result = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -329,3 +396,136 @@ def track_recipe(userID, recipeID, servingSize):
         conn.close()
     except Exception as e:
         print(f"Track Recipe Error: {e}")
+        print(f"Approve Recipe Error: {e}")
+
+def create_recipe(recipe_id, title, description, serving_size, total_calories, adder_id, image_url):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO Recipe(recipeid, title, description, timestamp, servingsize, 
+                   totalcalories, adderid, approved_modid, approved_status, image_url)
+            VALUES (%s, %s, %s, NOW(), %s, %s, %s, False, %s);
+        """
+        cursor.execute(query, (recipe_id, title, description, serving_size, total_calories, adder_id, image_url))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Create Recipe Error: {e}")
+
+def delete_recipe(recipe_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "DELETE FROM Recipe WHERE RecipeID = %s;"
+        cursor.execute(query, (recipe_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Delete Recipe Error: {e}")
+
+def like_recipe(user_id, recipe_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO Like (UserID, RecipeID, TimeStamp)
+            VALUES (%s, %s, NOW());
+        """
+        cursor.execute(query, (user_id, recipe_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Like Recipe Error: {e}")
+
+def view_all_members():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT userid, name, email FROM "User"
+            WHERE userflag = 0;
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"View All Members Error: {e}")
+
+def view_all_moderators():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT * FROM "User"
+            WHERE userflag = 1;
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"View All Members Error: {e}")
+
+def admin_analytics_past_30_days():
+    try:
+        counts = { "recipes" : 0, "ingredients" : 0, "categories" : 0, "users" : 0 }
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT COUNT(*) FROM Recipe
+            WHERE timestamp >= NOW() - INTERVAL '30 days';
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["recipes"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM Ingredients
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["ingredients"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM Ingredients
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["categories"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM \"User\"
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["users"] = result[0]
+
+        cursor.close()
+        conn.close()
+        return counts
+    except Exception as e:
+        print(f"New Recipes Past 30 Days Error: {e}")
+
+def get_admin_by_id(admin_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT name, email, password
+            FROM Admin
+            WHERE adminid = %s;
+        """
+        cursor.execute(query, (admin_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Admin by ID Error: {e}")

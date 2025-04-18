@@ -2,10 +2,13 @@ import base64
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import db as db
+from flask import Flask, request, render_template
+import db
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
+
 
 
 @app.route("/ping", methods=["GET"])
@@ -18,8 +21,8 @@ def get_default_picture():
         return base64.b64encode(binary_data).decode("utf-8")
 
 @app.route("/")
-def index():
-    return render_template("index.html", image = get_default_picture())       
+def home():
+    return render_template("index.html")
 
 @app.route("/recipes/<int:recipe_id>")
 def recipe_page(recipe_id):
@@ -32,9 +35,10 @@ def recipe_page(recipe_id):
             "TimeStamp": result[3],
             "Serving_Size": result[4],
             "TotalCalories": result[5],
-            "AdderID": result[7],
-            "Approved_ModID": result[8],
-            "Approved_Status": result[9]
+            "AdderID": result[6],
+            "Approved_ModID": result[7],
+            "Approved_Status": result[8],
+            "ImageURL": result[9]
         }
         return render_template("recipe.html", recipe=recipe)
     else:
@@ -57,16 +61,48 @@ def recipe_api(recipe_id):
         }
         return jsonify(recipe), 200
     else:
-        return jsonify({"message": "Recipe not found"}), 404
+        return jsonify({"message": "Recipe not found"})
 
+@app.route("/admin/<int:admin_id>", methods=["GET"])
+def admin_page(admin_id):
+    analytics = db.admin_analytics_past_30_days()
+    # TODO: make a display chart stuff for analytics
+    admin = db.get_admin_by_id(admin_id)
+    admin_name = admin[0]   
+    # pass everything to frontend
 
-@app.route("/test/<int:categoryid>")
-def test(categoryid):
-    print(db.view_category(categoryid))
-    print(db.delete_category(categoryid, 1))
-    db.create_category("Test Category", 1)
-    
-    return render_template("index.html", image=get_default_picture())
+@app.route("/admin/manage-member/", methods=["GET"])
+def view_all_members():
+    members = db.view_all_members()
+    if members:
+        members_json = []
+        for member in members:
+            x = {
+                "userID": member[0],
+                "name": member[1],
+                "email": member[2]
+            }
+            members_json.append(x)
+        return jsonify(members_json)
+    else:
+        return jsonify({"message": "No Members Found"})
+
+@app.route("/admin/manage-moderator/", methods=["GET"])
+def view_all_moderators():
+    moderators = db.view_all_moderators()
+    if moderators:
+        moderator_json = []
+        for moderator in moderators:
+            x = {
+                "userID": moderator[0],
+                "name": moderator[1],
+                "email": moderator[2]
+            }
+            moderator_json.append(x)
+        return jsonify(moderator_json)
+    else:
+        return jsonify({"message": "No Members Found"})    
+
 
 @app.route("/login", methods=["POST"])
 def login():
