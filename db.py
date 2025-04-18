@@ -85,7 +85,7 @@ def authenticate_user(email, password):
         cursor = conn.cursor()
         query = """
             SELECT userid, name, email, phone_no, password, aid, userflag
-            FROM "user"
+            FROM "User"
             WHERE email = %s AND password = %s;
         """
         cursor.execute(query, (email, password))

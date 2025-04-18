@@ -7,6 +7,11 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    return "pong", 200
+
 def get_default_picture():
     with open("images/default_recipe.png", "rb") as image_file:
         binary_data = image_file.read()
@@ -62,6 +67,35 @@ def test(categoryid):
     db.create_category("Test Category", 1)
     
     return render_template("index.html", image=get_default_picture())
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    print("🔐 Received login request:", data)
+
+    email = data.get("email")
+    password = data.get("password")
+    print("📩 Email:", email, "🔑 Password:", password)
+
+    try:
+        user = db.authenticate_user(email, password)
+        print("🎯 DB User:", user)
+
+        if user:
+            return jsonify({
+                "userid": user[0],
+                "name": user[1],
+                "email": user[2],
+                "userflag": user[6],
+                "message": "Login successful"
+            }), 200
+        else:
+            return jsonify({"message": "Invalid credentials"}), 401
+    except Exception as e:
+        print("❌ Login error:", e)
+        return jsonify({"message": "Server error"}), 500
+print("🚨 Route hit")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
