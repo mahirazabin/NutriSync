@@ -15,6 +15,34 @@ def get_connection():
         port=result.port
     )
     
+def create_admin(admin_id, name, email, password):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "INSERT INTO Admin VALUES (%s, %s, %s, %s);"
+        cursor.execute(query, (admin_id, name, email, password))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Create Admin Error: {e}")  
+    
+def update_admin(admin_id, name, email, password):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            UPDATE Admin
+            SET Name = %s, Email = %s, Password = %s
+            WHERE AdminID = %s;
+        """
+        cursor.execute(query, (name, email, password, admin_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Update Admin Error: {e}")
+
 def create_user(name, email, phone_no, password, aid, user_flag):
     try:
         conn = get_connection()
@@ -28,7 +56,6 @@ def create_user(name, email, phone_no, password, aid, user_flag):
         cursor.close()
         conn.close()
     except Exception as e:
-        print(f"Create Admin Error: {e}")  
         print(f"Create User Error: {e}")
 
 # def get_user(userid):
@@ -288,6 +315,15 @@ def view_ingredient(ingredientID):
             WHERE IngredientID = %s;
         """
         cursor.execute(query, (ingredientID,))
+    except Exception as e:
+        print(f"View Ingredient Error: {e}")
+       
+def select_ingredients(ingredient_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
+        cursor.execute(query, (ingredient_id,))
         result = cursor.fetchone()
         cursor.close()
         conn.close()
@@ -336,6 +372,7 @@ def reject_recipe(recipe_id: int) -> None:
 #         query = "SELECT Name FROM Category WHERE CategoryID = %s;"
 #         cursor.execute(query, (category_id,))
 #         print(f"View Ingredient Error: {e}")
+        print(f"View Ingredient Error: {e}")
     
 def delete_ingredient(ingredientID, userID):
     try:
@@ -466,6 +503,19 @@ def view_category(categoryID):
             WHERE CategoryID = %s;
         """
         cursor.execute(query, (categoryID,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"View Category Error: {e}")
+
+def select_category(category_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = "SELECT Name FROM Category WHERE CategoryID = %s;"
+        cursor.execute(query, (category_id,))
         result = cursor.fetchone()
         cursor.close()
         conn.close()
@@ -512,7 +562,7 @@ def create_recipe(recipe_id, title, description, serving_size, total_calories, a
             JOIN category C ON B.categoryid = C.categoryid
             WHERE B.recipeid = %s;
         """
-        cursor.execute(query, (recipeID,))
+        cursor.execute(query, (recipe_id,))
         result = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -532,6 +582,23 @@ def track_recipe(userID, recipeID, servingSize):
             WHERE userid = %s;
         """
         cursor.execute(query, (servingSize, userID))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Track Recipe Error: {e}")
+        print(f"Approve Recipe Error: {e}")
+
+def create_recipe(recipe_id, title, description, serving_size, total_calories, adder_id, image_url):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO Recipe(recipeid, title, description, timestamp, servingsize, 
+                   totalcalories, adderid, approved_modid, approved_status, image_url)
+            VALUES (%s, %s, %s, NOW(), %s, %s, %s, False, %s);
+        """
+        cursor.execute(query, (recipe_id, title, description, serving_size, total_calories, adder_id, image_url))
         conn.commit()
         cursor.close()
         conn.close()
@@ -565,3 +632,92 @@ def like_recipe(user_id, recipe_id):
     except Exception as e:
         print(f"Like Recipe Error: {e}")
         print(f"Track Recipe Error: {e}")
+
+def view_all_members():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT userid, name, email FROM "User"
+            WHERE userflag = 0;
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"View All Members Error: {e}")
+
+def view_all_moderators():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT * FROM "User"
+            WHERE userflag = 1;
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"View All Members Error: {e}")
+
+def admin_analytics_past_30_days():
+    try:
+        counts = { "recipes" : 0, "ingredients" : 0, "categories" : 0, "users" : 0 }
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT COUNT(*) FROM Recipe
+            WHERE timestamp >= NOW() - INTERVAL '30 days';
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["recipes"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM Ingredients
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["ingredients"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM Ingredients
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["categories"] = result[0]
+
+        query = """
+            SELECT COUNT(*) FROM \"User\"
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        counts["users"] = result[0]
+
+        cursor.close()
+        conn.close()
+        return counts
+    except Exception as e:
+        print(f"New Recipes Past 30 Days Error: {e}")
+
+def get_admin_by_id(admin_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT name, email, password
+            FROM Admin
+            WHERE adminid = %s;
+        """
+        cursor.execute(query, (admin_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Admin by ID Error: {e}")
