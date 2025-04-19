@@ -1,4 +1,6 @@
-from flask import Flask, jsonify, request, render_template
+import os
+from dotenv import load_dotenv
+from flask import Flask, jsonify, request, render_template, session
 import db
 
 import logging
@@ -6,10 +8,75 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
+load_dotenv()
+
+app.secret_key = os.getenv('secret_key', 'dev_key') 
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
+# Signup a new member
+@app.route('/api/signup', methods=['POST'])
+def signup_api():
+    data = request.get_json() or {}
+    name     = data.get('name')
+    email    = data.get('email')    
+    password = data.get('password')
+    phone_no = data.get('phone_no')
+    if not all([name, email, password, phone_no]):
+        return jsonify({'error': 'Missing fields'}), 400
+    try:
+        db.create_user(name, email, phone_no, password, None, 3) # 3 is member, 2 is mod, 1 is admin
+        return jsonify({'message': 'User created'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# Login and set session
+@app.route('/api/login', methods=['POST'])
+def login_api():
+    data = request.get_json() or {}
+    email    = data.get('email')
+    password = data.get('password')
+    user = db.authenticate_user(email, password)
+    if not user:
+        return jsonify({'error': 'Invalid credentials'}), 401
+    session['user_id'] = user[0]
+    session['user_name'] = user[1]
+    session['role']    = user[6]
+    print(user)
+    return jsonify({'message': 'Logged in', 'user': {'UserID': user[0], 'UserName': user[1], 'Role': user[6]}}), 200
+
+# Tell the front end who’s logged in
+@app.route('/api/user')
+def get_user_api():
+    user_id = session.get('user_id')
+    user_name = session.get('user_name')
+    print(user_name)
+    role = session.get('role')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+    return jsonify({'UserID': user_id, 'UserName': user_name, 'Role': role}), 200
+
+#Return all of the recipes created by that user (created only for now)
+@app.route('/api/user/recipes')
+def user_recipes_api():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    rows = db.get_recipes_by_user(user_id)
+    recipes = [{
+        'RecipeID':      row[0],
+        'Title':         row[1],
+        'Description':   row[2],
+        'TimeStamp':     row[3].isoformat() if hasattr(row[3], 'isoformat') else row[3],
+        'Serving_Size':  row[4],
+        'TotalCalories': row[5],
+        'ImageURL':      row[6],
+    } for row in rows]
+
+    return jsonify(recipes), 200
 
 @app.route('/api/recipes/pending')
 def list_pending_recipes():
@@ -92,6 +159,34 @@ def reject_recipe_api(recipe_id):
     except Exception as e:
         return jsonify({ 'error': str(e) }), 500
     
+
+# @app.route("/login", methods=["POST"])
+# def login():
+#     data = request.get_json()
+#     print("🔐 Received login request:", data)
+
+#     email = data.get("email")
+#     password = data.get("password")
+#     print("📩 Email:", email, "🔑 Password:", password)
+
+#     try:
+#         user = db.authenticate_user(email, password)
+#         print("🎯 DB User:", user)
+
+#         if user:
+#             return jsonify({
+#                 "userid": user[0],
+#                 "name": user[1],
+#                 "email": user[2],
+#                 "userflag": user[6],
+#                 "message": "Login successful"
+#             }), 200
+#         else:
+#             return jsonify({"message": "Invalid credentials"}), 401
+#     except Exception as e:
+#         print("❌ Login error:", e)
+#         return jsonify({"message": "Server error"}), 500
+
     
 # List all ingredients
 @app.route('/api/ingredients')

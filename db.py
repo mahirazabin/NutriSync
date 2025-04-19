@@ -20,7 +20,7 @@ def create_user(name, email, phone_no, password, aid, user_flag):
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            INSERT INTO "user" (name, email, phone_no, password, aid, userflag)
+            INSERT INTO "User" (name, email, phoneno, password, aid, userflag)
             VALUES (%s, %s, %s, %s, %s, %s);
         """
         cursor.execute(query, (name, email, phone_no, password, aid, user_flag))
@@ -85,8 +85,8 @@ def authenticate_user(email, password):
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            SELECT userid, name, email, phone_no, password, aid, userflag
-            FROM "user"
+            SELECT userid, name, email, phoneno, password, aid, userflag
+            FROM "User"
             WHERE email = %s AND password = %s;
         """
         cursor.execute(query, (email, password))
@@ -176,6 +176,26 @@ def list_all_pending_recipes():
     except Exception as e:
         print(f"list_all_recipes Error: {e}")
         return []  
+ 
+def get_recipes_by_user(user_id):
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT recipeID, title, description, timestamp,
+                   servingSize, totalCalories, image_url
+            FROM Recipe
+            WHERE adderID = %s AND approved_status = TRUE;
+            """,
+            (user_id,)
+        )
+        rows = cur.fetchall()
+        cur.close(); conn.close()
+        return rows
+    except Exception as e:
+        print(f"get_recipes_by_user Error: {e}")
+        return []
  
 def search_recipe(recipe_id):
     try:
