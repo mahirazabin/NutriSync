@@ -216,6 +216,24 @@ def add_recipe_category(recipeID, categoryID):
     except Exception as e:
         print(f"Add Recipe Category Error: {e}")
 
+def get_calories_by_ingredient(ingredientID):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT calories/unit
+            FROM ingredient
+            WHERE ingredientid = %s;
+        """
+        cursor.execute(query, (ingredientID,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Calories by Ingredient Error: {e}")
+        return None
+
 def create_ingredient(name , calories, unit, userID):
     try:
         conn = get_connection()
@@ -437,12 +455,15 @@ def create_recipe(title, description, serving_size, total_calories, adder_id, im
         query = """
             INSERT INTO Recipe(title, description, timestamp, servingsize, 
                    totalcalories, adderid, approved_modid, approved_status, image_url)
-            VALUES (%s, %s, NOW(), %s, %s, %s, False, %s);
+            VALUES (%s, %s, NOW(), %s, %s, %s, null, False, %s)
+            RETURNING recipeid;
         """
         cursor.execute(query, (title, description, serving_size, total_calories, adder_id, image_url))
         conn.commit()
+        recipe_id = cursor.fetchone()[0]
         cursor.close()
         conn.close()
+        return recipe_id
     except Exception as e:
         print(f"Create Recipe Error: {e}")
 

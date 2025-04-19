@@ -57,11 +57,14 @@ def recipe_api(recipe_id):
 @app.route("/api/member/<int:id>/ingredient", methods=["GET"])
 def get_ingredients(id):
     ingredients = db.get_all_ingredient()
-    print(ingredients)
     if ingredients:
         ingredients_json = []
         for ingredient in ingredients:
-            ingredients_json.append(ingredient[1])
+            x = {
+                "ingredientID": ingredient[0],
+                "ingredientName": ingredient[1]
+            }
+            ingredients_json.append(x)
         return jsonify(ingredients_json)
     else:
         return jsonify([{"message": "No Ingredients Found"}])
@@ -69,11 +72,14 @@ def get_ingredients(id):
 @app.route("/api/member/<int:id>/category", methods=["GET"])
 def get_categories(id):
     categories = db.get_all_category()
-    print(categories)
     if categories:
         categories_json = []
         for category in categories:
-            categories_json.append(category[1])
+            x = {
+                "categoryID": category[0],
+                "categoryName": category[1]
+            }
+            categories_json.append(x)
         return jsonify(categories_json)
     else:
         return jsonify([{"message": "No Categories Found"}])
@@ -84,17 +90,22 @@ def add_recipe(id):
     title = data.get("title")
     descriptions = data.get("description")
     servings = data.get("servingSize")
-    ingredients = data.get("ingredient")
-    categories = data.get("category")
+    ingredients = data.get("ingredients")
+    categories = data.get("categories")
     image_url = data.get("imageURL")
 
-    # TODO: get the ingredient amount, ingredient_id, and category_id from the database
-
-    db.create_recipe(title, descriptions,servings,0,categories, id, image_url)
+    total_calories = 0
     for ingredient in ingredients:
-        db.add_recipe_ingredient(title, ingredient)
+        ingredient_id = ingredient.get("id")
+        quantity = ingredient.get("quantity")
+        calories = db.get_calories_by_ingredient(ingredient_id)
+        total_calories += calories[0] * quantity
+
+    recipe_id = db.create_recipe(title, descriptions,servings,total_calories, id, image_url)
+    for ingredient in ingredients:
+        db.add_recipe_ingredient(recipe_id, ingredient.get("id"))
     for category in categories:
-        db.add_recipe_category(title, category)
+        db.add_recipe_category(recipe_id, category.get("id"))
 
 # -------------------------------------------------- ADMIN --------------------------------------------------
 
@@ -148,7 +159,6 @@ def view_all_moderators(id):
 def manage_user(id, action):
     data = request.get_json()
     user_id = data.get("user_ids")
-    print(user_id)
     if action == "assign":
         for uid in user_id:
             db.assign_member(uid, id)
