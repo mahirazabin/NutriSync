@@ -153,6 +153,64 @@ def get_calories(id):
     else:
         return jsonify([0])
 
+@app.route("/api/member/<int:userid>/profile", methods=["GET"])
+def get_profile(userid):
+    user = db.get_user(userid)
+    if user:
+        user_json = {
+            "id": user[0],
+            "name": user[1],
+            "email": user[2],
+            "phoneno": user[3],
+            "password": user[4],
+            "access": "Moderator" if user[6] == 2 else "Member",
+        }
+        return jsonify(user_json)
+    else:
+        return None
+    
+@app.route("/api/member/<int:userid>/profile/update", methods=["POST"])
+def update_profile(userid):
+    db.update_user_info(userid, request.json["name"], request.json["email"], request.json["phoneno"], request.json["password"])
+
+@app.route("/api/member/<int:userid>/recipe", methods=["GET"])
+def get_user_recipes(userid):
+    recipes = db.get_recipes_of_user(userid)
+    if recipes:
+        recipes_json = []
+        for recipe in recipes:
+            x = {
+                "id": recipe[0],
+                "name": recipe[1],
+                "servings" : recipe[4],
+                "calories" : recipe[5],
+                "approved" : recipe[8],
+                "image" : recipe[9]
+            }
+            recipes_json.append(x)
+        return jsonify(recipes_json)
+    else:
+        return jsonify([{"id": "—", "name": "—", "servings": 0 , "calories": 0, "approved": 0, "image": "—"}])
+
+@app.route("/api/member/<int:userid>/liked", methods=["GET"])
+def get_liked_recipes(userid):
+    recipes = db.get_liked_recipes(userid)
+    if recipes:
+        recipes_json = []
+        for recipe in recipes:
+            x = {
+                "id": recipe[0],
+                "name": recipe[1],
+                "servings" : recipe[4],
+                "calories" : recipe[5],
+                "approved" : recipe[8],
+                "image" : recipe[9]
+            }
+            recipes_json.append(x)
+        return jsonify(recipes_json)
+    else:
+                return jsonify([{"id": "—", "name": "—", "servings": 0 , "calories": 0, "approved": 0, "image": "—"}])
+
 # -------------------------------------------------- ADMIN --------------------------------------------------
 
 @app.route("/api/admin/<int:admin_id>", methods=["GET"])

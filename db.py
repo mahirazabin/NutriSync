@@ -200,6 +200,40 @@ def add_recipe_ingredient(recipeID, ingredientID, amount):
         conn.close()
     except Exception as e:
         print(f"Add Recipe Ingredient Error: {e}")
+def get_recipes_of_user(userID):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT recipeid, title, description, timestamp, servingsize, 
+                   totalcalories, adderid, approved_modid, approved_status, image_url
+            FROM Recipe
+            WHERE adderid = %s;
+        """
+        cursor.execute(query, (userID,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Recipes by User Error: {e}")
+
+def get_liked_recipes(userID):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT R.recipeid, R.title, R.description, R.timestamp, R.servingsize, 
+                   R.totalcalories, R.adderid, R.approved_modid, R.approved_status, R.image_url
+            FROM Recipe R JOIN "Like" L ON L.recipeid = R.recipeid AND L.userid = %s;
+        """
+        cursor.execute(query, (userID,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Liked Recipes Error: {e}")
 
 def add_recipe_category(recipeID, categoryID):
     try:
