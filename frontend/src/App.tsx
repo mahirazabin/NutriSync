@@ -8,6 +8,7 @@ import ModeratorHome from './pages/Moderator/ModeratorHome';
 
 import Create from './pages/Member/CreateRecipes';
 import ManageModerator from './pages/Admin/ManageModerator';
+import MemberTracker from './pages/Member/MemberTracker';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/member/:id/" element={<MemberHome />} />
         <Route path={`/member/:id/create/`} element={<Create />} />
+        <Route path={`/member/:id/tracker/`} element={<MemberTracker />} />
         <Route path="/moderator/" element={<ModeratorHome />} />
         <Route path="/admin/:id" element={<AdminHome />} />
         <Route path={`/admin/:id/manage-member/`} element={<ManageMember />} />

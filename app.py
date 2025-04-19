@@ -122,6 +122,27 @@ def member_page(id):
         return jsonify(json_obj)
     else:
         return None
+    
+@app.route("/api/member/<int:userid>/tracker/recipe", methods=["GET"])
+def get_tracked_recipes(userid):
+    recipes = db.get_tracked_recipes_by_id(userid)
+    if recipes:
+        recipes_json = []
+        for recipe in recipes:
+            x = {
+                "id": recipe[0],
+                "name": recipe[1],
+                "calories" : recipe[2]
+            }
+            recipes_json.append(x)
+        return jsonify(recipes_json)
+    else:
+        return jsonify([{"id": "0", "name": "—", "calories": 0}])
+
+@app.route("/api/member/<int:userid>/tracker/delete/<int:recipeid>", methods=["DELETE"])
+def delete_tracked_recipe(userid, recipeid):
+    if userid != 0:
+        db.remove_recipe_from_tracker(userid, recipeid)
 
 @app.route("/api/member/<int:id>/calorie", methods=["GET"])
 def get_calories(id):

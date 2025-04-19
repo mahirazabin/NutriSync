@@ -285,6 +285,41 @@ def get_ingredient_by_id(ingredient_id):
     except Exception as e:
         print(f"View Ingredient Error: {e}")
     
+def remove_recipe_from_tracker(userID, recipeID):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            DELETE FROM recipe_contained_tracking
+            WHERE userid = %s AND recipeid = %s
+            RETURNING calories;
+        """
+        cursor.execute(query, (userID, recipeID))
+        result = cursor.fetchone()
+        conn.commit()
+        cursor.close()
+        conn.close()
+        if result:
+            remove_calories_from_tracker(userID, result[0])
+    except Exception as e:
+        print(f"Remove Recipe from Tracker Error: {e}")
+
+def remove_calories_from_tracker(userID, calories):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            UPDATE calorie_tracking
+            SET totalcalories = totalcalories - %s
+            WHERE userid = %s;
+        """
+        cursor.execute(query, (calories, userID))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Remove Calories from Tracker Error: {e}")
+
 def delete_ingredient(ingredientID, userID):
     try:
         conn = get_connection()
@@ -304,6 +339,23 @@ def delete_ingredient(ingredientID, userID):
         return True
     except Exception as e:
         print(f"Delete Ingredient Error: {e}")
+
+def get_tracked_recipes_by_id(userID):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT R.recipeid, R.title, T.calories
+            FROM Recipe R JOIN recipe_contained_tracking T ON T.userid = %s 
+            AND T.recipeid = R.recipeid;
+        """
+        cursor.execute(query, (userID,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Tracked Recipes Error: {e}")
 
 def view_recipe_ingredient(recipeID):
     try:
