@@ -477,22 +477,25 @@ def view_category(categoryID):
 # def approve_recipe(recipe_id, approved_mod_id, approved_status):
 #         print(f"View Category Error: {e}")
 
-def view_recipe_category(recipeID):
+def get_categories_for_recipe(recipe_id):
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-            UPDATE Recipe
-            SET Approved_ModID = %s, Approved_Status = %s
-            WHERE RecipeID = %s;
-        """
-        cursor.execute(query, (approved_mod_id, approved_status, recipe_id))
-        conn.commit()
-        cursor.close()
-        conn.close()
+        conn = get_connection(); cur = conn.cursor()
+        cur.execute(
+            '''
+            SELECT C.categoryID, C.name
+            FROM category_belongs_recipe B
+            JOIN Category C ON B.categoryID = C.categoryID
+            WHERE B.recipeID = %s;
+            ''', (recipe_id,)
+        )
+        rows = cur.fetchall()
+        cur.close(); conn.close()
+        return rows
     except Exception as e:
-        print(f"Approve Recipe Error: {e}")
-
+        print(f"get_categories_for_recipe Error: {e}")
+        return []
+    
+    
 def create_recipe(recipe_id, title, description, serving_size, total_calories, adder_id, image_url):
     try:
         conn = get_connection()

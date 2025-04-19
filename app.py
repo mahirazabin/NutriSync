@@ -159,6 +159,23 @@ def reject_recipe_api(recipe_id):
     except Exception as e:
         return jsonify({ 'error': str(e) }), 500
     
+# Ingredients list for recipe
+@app.route('/api/recipe/<int:recipe_id>/ingredients')
+def recipe_ingredients_api(recipe_id):
+    rows = db.view_recipe_ingredient(recipe_id)
+    items = [
+        {'ingredientID': r[0], 'name': r[1], 'calories': r[2], 'unit': r[3]}
+        for r in rows
+    ]
+    return jsonify(items)
+
+# Categories list for recipe
+@app.route('/api/recipe/<int:recipe_id>/categories')
+def recipe_categories_api(recipe_id):
+    rows = db.get_categories_for_recipe(recipe_id)
+    cats = [{'categoryID': c[0], 'name': c[1]} for c in rows]
+    return jsonify(cats)
+    
 
 # @app.route("/login", methods=["POST"])
 # def login():
