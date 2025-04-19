@@ -63,8 +63,8 @@ def get_user(userid):
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            SELECT userid, name, email, phone_no, password, aid, userflag
-            FROM "user"
+            SELECT userid, name, email, phoneno, password, aid, userflag
+            FROM "User"
             WHERE userid = %s;
         """
         cursor.execute(query, (userid,))
@@ -322,6 +322,40 @@ def view_recipe_ingredient(recipeID):
         return result
     except Exception as e:
         print(f"View Recipe Ingredient Error: {e}")
+
+def get_total_calories(userID):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT totalcalories
+            FROM calorie_tracking
+            WHERE userid = %s;
+        """
+        cursor.execute(query, (userID,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result[0] if result else None
+    except Exception as e:
+        print(f"Get Total Calories Error: {e}")
+
+def member_added_recipe_count(userID):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT COUNT(*)
+            FROM Recipe
+            WHERE adderid = %s;
+        """
+        cursor.execute(query, (userID,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Get Recipes by User Error: {e}")
 
 def create_category(name , userID):
     try:

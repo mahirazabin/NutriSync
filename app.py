@@ -107,6 +107,31 @@ def add_recipe(id):
     for category in categories:
         db.add_recipe_category(recipe_id, category.get("id"))
 
+# -------------------------------------------------- MEMBER --------------------------------------------------
+
+@app.route("/api/member/<int:id>", methods=["GET"])
+def member_page(id):
+    analytics = db.member_added_recipe_count(id)[0]
+    member = db.get_user(id)
+    if member:
+        member_name = member[1]
+        json_obj = {
+            "Name": member_name,
+            "recipe": analytics
+        }
+        return jsonify(json_obj)
+    else:
+        return None
+
+@app.route("/api/member/<int:id>/calorie", methods=["GET"])
+def get_calories(id):
+    calories = db.get_total_calories(id)
+    print(calories)
+    if calories:
+        return jsonify([int(calories)])
+    else:
+        return jsonify([0])
+
 # -------------------------------------------------- ADMIN --------------------------------------------------
 
 @app.route("/api/admin/<int:admin_id>", methods=["GET"])
