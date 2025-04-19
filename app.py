@@ -103,7 +103,7 @@ def add_recipe(id):
 
     recipe_id = db.create_recipe(title, descriptions,servings,total_calories, id, image_url)
     for ingredient in ingredients:
-        db.add_recipe_ingredient(recipe_id, ingredient.get("id"))
+        db.add_recipe_ingredient(recipe_id, ingredient.get("id"), ingredient.get("quantity"))
     for category in categories:
         db.add_recipe_category(recipe_id, category.get("id"))
 

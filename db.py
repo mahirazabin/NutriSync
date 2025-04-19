@@ -186,15 +186,15 @@ def search_recipe(recipe_id):
         print(f"Search Recipe Error: {e}")
         return None
     
-def add_recipe_ingredient(recipeID, ingredientID):
+def add_recipe_ingredient(recipeID, ingredientID, amount):
     try:
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            INSERT INTO ingredients_contains_recipe (recipeid, ingredientid)
-            VALUES (%s, %s);
+            INSERT INTO ingredients_contains_recipe (recipeid, ingredientid, measurement)
+            VALUES (%s, %s, %s);
         """
-        cursor.execute(query, (recipeID, ingredientID))
+        cursor.execute(query, (recipeID, ingredientID, amount))
         conn.commit()
         cursor.close()
         conn.close()
