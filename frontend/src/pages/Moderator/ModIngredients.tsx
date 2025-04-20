@@ -1,4 +1,5 @@
 import { useState, useEffect, ChangeEvent, FormEvent, JSX } from 'react';
+import { useParams } from 'react-router-dom';
 
 interface Ingredient {
   ingredientID: number;
@@ -9,6 +10,7 @@ interface Ingredient {
 }
 
 export default function ModIngredients(): JSX.Element {
+  const { id } = useParams<{ id: string }>();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [form, setForm] = useState({ name: '', calories: 0, unit: '', moderatorID: 123 });
   const [loading, setLoading] = useState(true);

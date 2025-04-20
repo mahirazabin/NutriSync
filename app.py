@@ -427,6 +427,26 @@ def recipe_categories_api(recipe_id):
 #         return jsonify({"message": "Server error"}), 500
 
     
+# Like a recipe
+@app.route('/api/recipe/<int:recipe_id>/like', methods=['POST'])
+def like_recipe_api(recipe_id):
+    user_id = session.get('user_id')
+    try:
+        db.like_recipe(user_id, recipe_id)
+        return jsonify({'message': 'Recipe liked'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Add recipe calories to tracker
+@app.route('/api/recipe/<int:recipe_id>/track', methods=['POST'])
+def track_recipe_api(recipe_id):
+    user_id = session.get('user_id')
+    try:
+        db.insert_recipe_tracking(user_id, recipe_id)
+        return jsonify({'message': 'Calories tracked'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 # List all ingredients
 @app.route('/api/ingredients')
 def list_ingredients():

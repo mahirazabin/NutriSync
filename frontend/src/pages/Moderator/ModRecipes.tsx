@@ -1,4 +1,5 @@
 import { useState, useEffect, JSX } from 'react';
+import { useParams } from 'react-router-dom';
 
 interface Recipe {
   RecipeID: number;
@@ -7,6 +8,7 @@ interface Recipe {
 }
 
 export default function ModRecipes(): JSX.Element {
+  const { id } = useParams<{ id: string }>();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

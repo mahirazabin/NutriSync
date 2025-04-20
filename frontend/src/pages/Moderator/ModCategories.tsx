@@ -1,4 +1,5 @@
 import { useState, useEffect, ChangeEvent, FormEvent, JSX } from 'react';
+import { useParams } from 'react-router-dom';
 
 interface Category {
   categoryID: number;
@@ -7,6 +8,7 @@ interface Category {
 }
 
 export default function ModCategories(): JSX.Element {
+  const { id } = useParams<{ id: string }>();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ name: '', moderatorID: 123 });
   const [loading, setLoading] = useState(true);
