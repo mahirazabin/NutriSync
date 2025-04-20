@@ -1,36 +1,30 @@
-import React, { useState } from 'react';
+import { useState, FormEvent, JSX } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 
-const LoginPage: React.FC = () => {
+export default function Login(): JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setMessage(''); // clear previous messages
-
     try {
-      const response = await fetch('http://localhost:5000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const res = await fetch('/api/login', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
       });
-
-      const data = await response.json();
-      if (response.ok) {
-        setMessage(`✅ Login successful! Welcome ${data.name} (${data.userflag})`);
-        // TODO: redirect based on userflag
-        // e.g., navigate('/admin') or navigate('/member')
-      } else {
-        setMessage(`❌ ${data.message}`);
-      }
-    } catch (error) {
-      console.error(error);
-      setMessage('❌ Failed to connect to server.');
+      if (!res.ok) throw new Error((await res.json()).error || res.statusText);
+      navigate('/member'); 
+    } catch(err: any) {
+      setError(err.message);
     }
   };
 
   return (
+    <><Navbar />
+    
     <div style={{
       height: '100vh',
       display: 'flex',
@@ -39,7 +33,7 @@ const LoginPage: React.FC = () => {
       backgroundColor: '#f7f7f7'
     }}>
       <form
-        onSubmit={handleLogin}
+        onSubmit={handleSubmit}
         style={{
           backgroundColor: 'white',
           padding: '2rem',
@@ -62,8 +56,7 @@ const LoginPage: React.FC = () => {
             marginBottom: '1rem',
             borderRadius: '4px',
             border: '1px solid #ccc'
-          }}
-        />
+          }} />
 
         <input
           type="password"
@@ -77,8 +70,7 @@ const LoginPage: React.FC = () => {
             marginBottom: '1rem',
             borderRadius: '4px',
             border: '1px solid #ccc'
-          }}
-        />
+          }} />
 
         <button
           type="submit"
@@ -95,14 +87,13 @@ const LoginPage: React.FC = () => {
           Login
         </button>
 
-        {message && (
-          <p style={{ marginTop: '1rem', textAlign: 'center', color: message.startsWith('✅') ? 'green' : 'red' }}>
-            {message}
-          </p>
-        )}
+        {/* {onmessage && (
+      <p style={{ marginTop: '1rem', textAlign: 'center'}}>
+
+      </p>
+    )} */}
       </form>
-    </div>
+    </div></>
   );
 };
 
-export default LoginPage;
