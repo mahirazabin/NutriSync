@@ -58,6 +58,23 @@ def get_user_api():
         return jsonify({'error': 'Not logged in'}), 401
     return jsonify({'UserID': user_id, 'UserName': user_name, 'Role': role}), 200
 
+# Search & filter recipes based on category and/or ingredient
+@app.route('/api/recipes/search')
+def search_recipes_api():
+    category_id   = request.args.get('category_id', type=int)
+    ingredient_id = request.args.get('ingredient_id', type=int)
+    rows = db.search_recipes(category_id, ingredient_id)
+    recipes = [
+        {
+            'RecipeID':    r[0],
+            'Title':       r[1],
+            'Description': r[2],
+            'ImageURL':    r[3]
+        }
+        for r in rows
+    ]
+    return jsonify(recipes)
+
 #Return all of the recipes created by that user (created only for now)
 @app.route('/api/user/recipes')
 def user_recipes_api():

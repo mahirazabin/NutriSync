@@ -609,6 +609,39 @@ def get_all_categories():
         print(f"get_all_categories Error: {e}")
         return []
 
+# Search recipes by optional category and/or ingredient
+def search_recipes(category_id: int = None, ingredient_id: int = None):
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        base = ["SELECT DISTINCT R.recipeID, R.title, R.description, R.image_url",
+                "FROM Recipe R"]
+        joins = []
+        filters = ["R.approved_status = TRUE"]
+        params = []
+
+        if ingredient_id:
+            joins.append(
+                "JOIN ingredients_contains_recipe CIR ON R.recipeID = CIR.recipeID"
+            )
+            filters.append("CIR.ingredientID = %s")
+            params.append(ingredient_id)
+        if category_id:
+            joins.append(
+                "JOIN category_belongs_recipe CBR ON R.recipeID = CBR.recipeID"
+            )
+            filters.append("CBR.categoryID = %s")
+            params.append(category_id)
+
+        sql = " ".join(base + joins + ["WHERE " + " AND ".join(filters)]) + ";"
+        cur.execute(sql, tuple(params))
+        rows = cur.fetchall()
+        cur.close(); conn.close()
+        return rows
+    except Exception as e:
+        print(f"search_recipes Error: {e}")
+        return []
+
 def create_category(name , userID):
     try:
         conn = get_connection()

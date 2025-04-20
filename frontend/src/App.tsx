@@ -16,6 +16,7 @@ import Create from './pages/Member/CreateRecipes';
 import ManageModerator from './pages/Admin/ManageModerator';
 import MemberTracker from './pages/Member/MemberTracker';
 import MemberProfile from './pages/Member/MemberProfile';
+import SearchRecipes from './pages/Member/SearchRecipes';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path={`/member/:id/profile/`} element={<MemberProfile />} />
         <Route path={`/member/:id/create/`} element={<Create />} />
         <Route path={`/member/:id/tracker/`} element={<MemberTracker />} />
+        <Route path="/member/:id/search" element={<SearchRecipes />} />
         <Route path="/moderator/" element={<ModeratorHome />} />
         <Route path="/admin/:id" element={<AdminHome />} />
         <Route path="/recipes/:id" element={<RecipePage />} />
