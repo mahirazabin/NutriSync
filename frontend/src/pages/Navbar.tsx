@@ -3,12 +3,10 @@ import { Link } from "react-router-dom";
 export default function Navbar() {
   return (
     <nav className="flex justify-between items-center px-8 py-4 bg-white border-b border-gray-100 shadow-sm">
-      {/* Logo / Title */}
       <div className="text-2xl font-extrabold text-blue-700 tracking-tight">
         NutriSync
       </div>
 
-      {/* Navigation */}
       <div className="flex space-x-4">
         <Link
           to="/"
