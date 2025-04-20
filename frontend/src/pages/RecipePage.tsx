@@ -21,6 +21,20 @@ export default function RecipeDetail(): JSX.Element {
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState<string | null>(null);
 
+   // Like handler
+  const handleLike = async (): Promise<void> => {
+    const res = await fetch(`/api/recipe/${id}/like`, { method: 'POST' });
+    if (!res.ok) alert('Error liking recipe');
+    else alert('Liked!');
+  };
+
+  // Track handler
+  const handleTrack = async (): Promise<void> => {
+    const res = await fetch(`/api/recipe/${id}/track`, { method: 'POST' });
+    if (!res.ok) alert('Error tracking');
+    else alert('Calories added to tracker!');
+  };
+
   useEffect(() => {
     async function load() {
       try {
@@ -61,8 +75,8 @@ export default function RecipeDetail(): JSX.Element {
         <li><strong>Calorie Info:</strong> {recipe.TotalCalories} kcal</li>
         <li><strong>Category Tags:</strong> {categories.map(c => (<span key={c.categoryID}>{c.name} </span>))}</li>
       </ul>
-      <button>Like</button>
-      <button style={{ marginLeft: 8 }}>Add to Tracker</button>
+      <button onClick={handleLike}>Like</button>
+      <button style={{ marginLeft: 8 }} onClick={handleTrack}>Add to Tracker</button>
     </div>
   );
 }
