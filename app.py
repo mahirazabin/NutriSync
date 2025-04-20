@@ -27,7 +27,7 @@ def signup_api():
     if not all([name, email, password, phone_no]):
         return jsonify({'error': 'Missing fields'}), 400
     try:
-        db.create_user(name, email, phone_no, password, None, 3) # 3 is member, 2 is mod, 1 is admin
+        db.create_user(name, email, phone_no, password, None, 1) # 3 is member, 2 is mod, 1 is admin
         return jsonify({'message': 'User created'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
