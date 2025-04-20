@@ -6,22 +6,42 @@ export default function Login(): JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [id, setId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       const res = await fetch('/api/login', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
+  
       if (!res.ok) throw new Error((await res.json()).error || res.statusText);
-      navigate('/member/'); 
-    } catch(err: any) {
+  
+      const data = await res.json();
+      const userId = data.user.UserID;
+      const userRole = data.user.Role;  
+      console.log(userId, userRole)
+      switch (userRole) {
+        case 3:
+          navigate(`/admin/${userId}`);
+          break;
+        case 2:
+          navigate(`/moderator/${userId}`);
+          break;
+        case 1:
+          navigate(`/member/${userId}`);
+          break;
+        default:
+          navigate('/');
+          alert("Login Failed. Please try again.");
+      }
+    } catch (err: any) {
       setError(err.message);
     }
   };
+  
 
   return (
     <><Navbar />
