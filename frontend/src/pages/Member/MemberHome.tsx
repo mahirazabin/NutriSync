@@ -1,70 +1,90 @@
-import { useState, useEffect, JSX } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 
-interface User {
-    UserID: number;
-    UserName: string;
-    Role: number;
-  }
+const MemberHome: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [userCalories, setUserCalories] = useState<number>(0);
+  const [member, setMember] = useState<{Name : string , recipe: 0} | null>(null);
 
-interface Recipe {
-  RecipeID: number;
-  Title: string;
-  Description: string;
-  TimeStamp: string;
-  Serving_Size: number;
-  TotalCalories: number;
-  ImageURL?: string;
-}
+  const fetchUserCalories = async () => {
+    try {
+      const res = await fetch(`/api/member/${id}/calorie`);
+      const data = await res.json();
+      setUserCalories(data[0]);
+    } catch (err) {
+      alert('Failed to fetch user calories');
+    }
+  };
 
-export default function MemberHome(): JSX.Element {
-  const [user, setUser] = useState<User | null>(null);
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const fetchMember = async () => {
+    try {
+      const res = await fetch(`/api/member/${id}`);
+      const data = await res.json();
+      setMember(data);
+    } catch (err) {
+      alert('Failed to fetch member');
+    }
+  };
 
   useEffect(() => {
-    async function load() {
-      try {
-        // 1) confirm we’re logged in
-        const userRes = await fetch('/api/user');
-        if (!userRes.ok) throw new Error('Not logged in');
-
-        const userData: User = await userRes.json();
-        console.log(userData);
-        setUser(userData);
-
-
-        // 2) fetch recipes created by this user.
-        const res = await fetch('/api/user/recipes');
-        if (!res.ok) throw new Error('Failed loading recipes');
-
-        const data: Recipe[] = await res.json();
-        setRecipes(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    fetchUserCalories();
+    fetchMember();
   }, []);
 
-  if (loading) return <p>Loading your recipes…</p>;
-  if (error)   return <p style={{ color: 'red' }}>Error: {error}</p>;
+  if (member === null) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Hello, {user?.UserName}</h2>
-      <h3>Your Recipes:</h3>
-      <ul>
-        {recipes.map(r => (
-          <li key={r.RecipeID}>
-            <a href={`/recipes/${r.RecipeID}`}>{r.Title}</a>
-          </li>
-        ))}
-      </ul>
-      {recipes.length === 0 && <p>You haven’t added any recipes yet.</p>}
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="bg-white shadow-md rounded-xl p-6 mb-6 border">
+        <h2>
+        Hello, {member.Name}
+        </h2>
+      </div>
+
+      <table >
+        <thead>
+          <tr>
+            <th>Analytics</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Recipes added till now</td>
+            <td>{member.recipe}</td>
+          </tr>
+          <tr>
+            <td>Tracker</td>
+            <td>{userCalories}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br /><br />
+
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <Link to={`/member/${id}/search/`}>
+            Search Recipes
+        </Link>
+
+        <br /><br />
+
+        <Link to={`/member/${id}/create/`}>
+            Create Recipes
+        </Link>
+
+        <br /><br />
+
+        <Link to={`/member/${id}/tracker/`}>
+            Personal Tracker
+        </Link>
+      </div>
     </div>
   );
-}
+};
+
+export default MemberHome;
