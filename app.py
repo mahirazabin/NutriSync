@@ -27,7 +27,7 @@ def signup_api():
     if not all([name, email, password, phone_no]):
         return jsonify({'error': 'Missing fields'}), 400
     try:
-        db.create_user(name, email, phone_no, password, None, 3) # 3 is member, 2 is mod, 1 is admin
+        db.create_user(name, email, phone_no, password, None, 1) # 3 is member, 2 is mod, 1 is admin
         return jsonify({'message': 'User created'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -137,17 +137,182 @@ def recipe_api(recipe_id):
         return jsonify(recipe), 200
     else:
         return jsonify({"message": "Recipe not found"})
+# -------------------------------------------------- RECIPES --------------------------------------------------
+@app.route("/api/member/<int:id>/ingredient", methods=["GET"])
+def get_ingredients(id):
+    ingredients = db.get_all_ingredient()
+    if ingredients:
+        ingredients_json = []
+        for ingredient in ingredients:
+            x = {
+                "ingredientID": ingredient[0],
+                "ingredientName": ingredient[1]
+            }
+            ingredients_json.append(x)
+        return jsonify(ingredients_json)
+    else:
+        return jsonify([{"message": "No Ingredients Found"}])
 
-@app.route("/admin/<int:admin_id>", methods=["GET"])
+@app.route("/api/member/<int:id>/category", methods=["GET"])
+def get_categories(id):
+    categories = db.get_all_category()
+    if categories:
+        categories_json = []
+        for category in categories:
+            x = {
+                "categoryID": category[0],
+                "categoryName": category[1]
+            }
+            categories_json.append(x)
+        return jsonify(categories_json)
+    else:
+        return jsonify([{"message": "No Categories Found"}])
+    
+@app.route("/api/member/<int:id>/add-recipe", methods=["POST"])
+def add_recipe(id):
+    data = request.get_json()
+    title = data.get("title")
+    descriptions = data.get("description")
+    servings = data.get("servingSize")
+    ingredients = data.get("ingredients")
+    categories = data.get("categories")
+    image_url = data.get("imageURL")
+
+    total_calories = 0
+    for ingredient in ingredients:
+        ingredient_id = ingredient.get("id")
+        quantity = ingredient.get("quantity")
+        calories = db.get_calories_by_ingredient(ingredient_id)
+        total_calories += calories[0] * quantity
+
+    recipe_id = db.create_recipe(title, descriptions,servings,total_calories, id, image_url)
+    for ingredient in ingredients:
+        db.add_recipe_ingredient(recipe_id, ingredient.get("id"), ingredient.get("quantity"))
+    for category in categories:
+        db.add_recipe_category(recipe_id, category.get("id"))
+
+# -------------------------------------------------- MEMBER --------------------------------------------------
+
+@app.route("/api/member/<int:id>", methods=["GET"])
+def member_page(id):
+    analytics = db.member_added_recipe_count(id)[0]
+    member = db.get_user(id)
+    if member:
+        member_name = member[1]
+        json_obj = {
+            "Name": member_name,
+            "recipe": analytics
+        }
+        return jsonify(json_obj)
+    else:
+        return None
+    
+@app.route("/api/member/<int:userid>/tracker/recipe", methods=["GET"])
+def get_tracked_recipes(userid):
+    recipes = db.get_tracked_recipes_by_id(userid)
+    if recipes:
+        recipes_json = []
+        for recipe in recipes:
+            x = {
+                "id": recipe[0],
+                "name": recipe[1],
+                "calories" : recipe[2]
+            }
+            recipes_json.append(x)
+        return jsonify(recipes_json)
+    else:
+        return jsonify([{"id": "0", "name": "—", "calories": 0}])
+
+@app.route("/api/member/<int:userid>/tracker/delete/<int:recipeid>", methods=["DELETE"])
+def delete_tracked_recipe(userid, recipeid):
+    if userid != 0:
+        db.remove_recipe_from_tracker(userid, recipeid)
+
+@app.route("/api/member/<int:id>/calorie", methods=["GET"])
+def get_calories(id):
+    calories = db.get_total_calories(id)
+    print(calories)
+    if calories:
+        return jsonify([int(calories)])
+    else:
+        return jsonify([0])
+
+@app.route("/api/member/<int:userid>/profile", methods=["GET"])
+def get_profile(userid):
+    user = db.get_user(userid)
+    if user:
+        user_json = {
+            "id": user[0],
+            "name": user[1],
+            "email": user[2],
+            "phoneno": user[3],
+            "password": user[4],
+            "access": "Moderator" if user[6] == 2 else "Member",
+        }
+        return jsonify(user_json)
+    else:
+        return None
+    
+@app.route("/api/member/<int:userid>/profile/update", methods=["POST"])
+def update_profile(userid):
+    db.update_user_info(userid, request.json["name"], request.json["email"], request.json["phoneno"], request.json["password"])
+
+@app.route("/api/member/<int:userid>/recipe", methods=["GET"])
+def get_user_recipes(userid):
+    recipes = db.get_recipes_of_user(userid)
+    if recipes:
+        recipes_json = []
+        for recipe in recipes:
+            x = {
+                "id": recipe[0],
+                "name": recipe[1],
+                "servings" : recipe[4],
+                "calories" : recipe[5],
+                "approved" : recipe[8],
+                "image" : recipe[9]
+            }
+            recipes_json.append(x)
+        return jsonify(recipes_json)
+    else:
+        return jsonify([{"id": "—", "name": "—", "servings": 0 , "calories": 0, "approved": 0, "image": "—"}])
+
+@app.route("/api/member/<int:userid>/liked", methods=["GET"])
+def get_liked_recipes(userid):
+    recipes = db.get_liked_recipes(userid)
+    if recipes:
+        recipes_json = []
+        for recipe in recipes:
+            x = {
+                "id": recipe[0],
+                "name": recipe[1],
+                "servings" : recipe[4],
+                "calories" : recipe[5],
+                "approved" : recipe[8],
+                "image" : recipe[9]
+            }
+            recipes_json.append(x)
+        return jsonify(recipes_json)
+    else:
+                return jsonify([{"id": "—", "name": "—", "servings": 0 , "calories": 0, "approved": 0, "image": "—"}])
+
+# -------------------------------------------------- ADMIN --------------------------------------------------
+
+@app.route("/api/admin/<int:admin_id>", methods=["GET"])
 def admin_page(admin_id):
     analytics = db.admin_analytics_past_30_days()
-    # TODO: make a display chart stuff for analytics
     admin = db.get_admin_by_id(admin_id)
-    admin_name = admin[0]   
-    # pass everything to frontend
+    if admin:
+        admin_name = admin[0]   
+        json_obj = {
+            "adminName": admin_name,
+            "analytics": analytics
+        }
+        return jsonify(json_obj)
+    else:
+        return jsonify({"adminName": "None", "analytics": "None"})
 
-@app.route("/admin/manage-member/", methods=["GET"])
-def view_all_members():
+@app.route("/api/admin/<int:id>/manage-member/", methods=["GET"])
+def view_all_members(id):
     members = db.view_all_members()
     if members:
         members_json = []
@@ -160,10 +325,10 @@ def view_all_members():
             members_json.append(x)
         return jsonify(members_json)
     else:
-        return jsonify({"message": "No Members Found"})
+        return jsonify([{"userID": "No Active Members", "name": "—", "email": "example@email.com"}])
 
-@app.route("/admin/manage-moderator/", methods=["GET"])
-def view_all_moderators():
+@app.route("/api/admin/<int:id>/manage-moderator/", methods=["GET"])
+def view_all_moderators(id):
     moderators = db.view_all_moderators()
     if moderators:
         moderator_json = []

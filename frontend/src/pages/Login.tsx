@@ -6,6 +6,7 @@ export default function Login(): JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [id, setId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -16,7 +17,7 @@ export default function Login(): JSX.Element {
         body: JSON.stringify({ email, password })
       });
       if (!res.ok) throw new Error((await res.json()).error || res.statusText);
-      navigate('/member'); 
+      navigate('/member/'); 
     } catch(err: any) {
       setError(err.message);
     }
