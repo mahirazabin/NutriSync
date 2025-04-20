@@ -28,12 +28,12 @@ function App() {
         <Route path={`/member/:id/profile/`} element={<MemberProfile />} />
         <Route path={`/member/:id/create/`} element={<Create />} />
         <Route path={`/member/:id/tracker/`} element={<MemberTracker />} />
-        <Route path="/moderator/" element={<ModeratorHome />} />
-        <Route path="/admin/:id" element={<AdminHome />} />
         <Route path="/recipes/:id" element={<RecipePage />} />
+        <Route path="/moderator/" element={<ModeratorHome />} />
         <Route path="/moderator/recipes" element={<ModRecipes />} />
         <Route path="/moderator/ingredients" element={<ModIngredients />} />
         <Route path="/moderator/categories" element={<ModCategories />} />
+        <Route path="/admin/:id" element={<AdminHome />} />
         <Route path={`/admin/:id/manage-member/`} element={<ManageMember />} />
         <Route path={`/admin/:id/manage-moderator/`} element={<ManageModerator />} />
       </Routes>

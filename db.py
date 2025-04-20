@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import numpy as np
 import psycopg2
 from urllib.parse import urlparse
 
@@ -120,11 +121,34 @@ def authenticate_user(email, password):
         result = cursor.fetchone()
         cursor.close()
         conn.close()
-        return result
+        if result:
+            return result
+        else:
+            return authenticate_admin(email, password)
     except Exception as e:
         print(f"Authentication Error: {e}")
         return None   
-    
+
+def authenticate_admin(email, password):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT adminid, name
+            FROM admin
+            WHERE email = %s AND password = %s;
+        """
+        cursor.execute(query, (email, password))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if result:
+            return (result[0], result[1],0,0,0,0, 3)
+        return None
+    except Exception as e:
+        print(f"Authentication Error: {e}")
+        return None
+
 def update_user_info(userid, name=None, email=None, phone_no=None, password=None):
     try:
         conn = get_connection()
