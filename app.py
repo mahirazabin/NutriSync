@@ -39,14 +39,14 @@ def login_api():
     email    = data.get('email')
     password = data.get('password')
     user = db.authenticate_user(email, password)
+    print(type(user))
     if not user:
         return jsonify({'error': 'Invalid credentials'}), 401
     session['user_id'] = user[0]
     session['user_name'] = user[1]
     session['role']    = user[6]
-    print(user)
     return jsonify({'message': 'Logged in', 'user': {'UserID': user[0], 'UserName': user[1], 'Role': user[6]}}), 200
-
+    
 # Tell the front end who’s logged in
 @app.route('/api/user')
 def get_user_api():
