@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 interface Recipe {
   id: string;
@@ -9,6 +9,7 @@ interface Recipe {
 
 const MemberTracker: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [totalCalories, setTotalCalories] = useState(0);
 
@@ -57,7 +58,14 @@ const MemberTracker: React.FC = () => {
       <nav className="flex items-center justify-start px-8 py-4 bg-white shadow border-b border-gray-200">
         <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
       </nav>
-
+      <div className="flex justify-start px-4 mt-4">
+        <button
+          onClick={() => navigate(`/member/${id}`)}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium shadow"
+        >
+          ← Back to Home
+        </button>
+      </div>
       <div className="min-h-screen bg-gray-50 flex justify-center px-4 py-10">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Recipe Tracker</h2>

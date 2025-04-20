@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Select from "react-select";
 
 type OptionType = {
@@ -17,6 +17,7 @@ type SelectedIngredientType = {
 
 const CreateRecipe: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [allIngredients, setAllIngredients] = useState<OptionType[]>([]);
   const [allCategories, setAllCategories] = useState<OptionType[]>([]);
@@ -126,7 +127,14 @@ const CreateRecipe: React.FC = () => {
       <nav className="flex items-center justify-start px-8 py-4 bg-white shadow border-b border-gray-200">
         <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
       </nav>
-
+      <div className="flex justify-start px-4 mt-4">
+        <button
+          onClick={() => navigate(`/member/${id}`)}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium shadow"
+        >
+          ← Back to Home
+        </button>
+      </div>
       <div className="min-h-screen bg-gray-50 flex justify-center items-start py-10 px-4">
         <form onSubmit={handleCreateRecipe} className="bg-white rounded-lg shadow-lg p-8 max-w-3xl w-full">
           <h2 className="text-2xl font-bold mb-6 text-gray-800">Create a Recipe</h2>
