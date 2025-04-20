@@ -44,77 +44,57 @@ export default function Login(): JSX.Element {
   
 
   return (
-    <><Navbar />
-    
-    <div style={{
-      height: '100vh',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#f7f7f7'
-    }}>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          backgroundColor: 'white',
-          padding: '2rem',
-          borderRadius: '8px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          width: '300px'
-        }}
-      >
-        <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>NutriSync Login</h2>
+    <>
+      <Navbar />
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+      <div
+          className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center bg-gray-100"
           style={{
-            width: '100%',
-            padding: '0.5rem',
-            marginBottom: '1rem',
-            borderRadius: '4px',
-            border: '1px solid #ccc'
-          }} />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            marginBottom: '1rem',
-            borderRadius: '4px',
-            border: '1px solid #ccc'
-          }} />
-
-        <button
-          type="submit"
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1605902711622-cfb43c4437d2?auto=format&fit=crop&w=1920&q=80')",
           }}
         >
-          Login
-        </button>
 
-        {/* {onmessage && (
-      <p style={{ marginTop: '1rem', textAlign: 'center'}}>
+        <div className="relative z-10 bg-white bg-opacity-90 backdrop-blur-md shadow-lg rounded-lg max-w-md w-full p-8">
+          <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">Login to NutriSync</h2>
 
-      </p>
-    )} */}
-      </form>
-    </div></>
+          {error && (
+            <div className="mb-4 text-red-600 text-sm text-center bg-red-100 p-2 rounded">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              Login
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Don’t have an account?{' '}
+            <a href="/signup" className="text-blue-600 hover:underline">Sign up here</a>
+          </p>
+        </div>
+      </div>
+    </>
   );
-};
-
+}
