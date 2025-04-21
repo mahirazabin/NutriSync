@@ -143,7 +143,7 @@ def authenticate_admin(email, password):
         cursor.close()
         conn.close()
         if result:
-            return (result[0], result[1],0,0,0,0, 3)
+            return (result[0], result[1],0,0,0,0, 1)
         return None
     except Exception as e:
         print(f"Authentication Error: {e}")
@@ -685,6 +685,24 @@ def search_recipes(category_id: int = None, ingredient_id: int = None):
     except Exception as e:
         print(f"search_recipes Error: {e}")
         return []
+
+def get_calories_by_recipe(recipe_id):
+    """
+    Return the stored total calories for a single recipe from the Recipe table.
+    """
+    try:
+        conn = get_connection()
+        cur  = conn.cursor()
+        cur.execute(
+            "SELECT totalcalories FROM Recipe WHERE recipeID = %s;",
+            (recipe_id,)
+        )
+        row = cur.fetchone()
+        cur.close(); conn.close()
+        return float(row[0]) if row and row[0] is not None else 0.0
+    except Exception as e:
+        print(f"get_calories_by_recipe Error: {e}")
+        return 0.0
 
 def create_category(name , userID):
     try:

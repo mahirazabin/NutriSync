@@ -24,13 +24,13 @@ export default function Login(): JSX.Element {
       const userRole = data.user.Role;  
       console.log(userId, userRole)
       switch (userRole) {
-        case 3:
+        case 1:
           navigate(`/admin/${userId}`);
           break;
         case 2:
           navigate(`/moderator/${userId}`);
           break;
-        case 1:
+        case 3:
           navigate(`/member/${userId}`);
           break;
         default:
