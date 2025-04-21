@@ -1,25 +1,26 @@
 import { useState, useEffect, JSX } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 interface Recipe {
-  RecipeID:      number;
-  Title:         string;
-  Description:   string;
-  TimeStamp:     string;
-  Serving_Size:  number;
+  RecipeID: number;
+  Title: string;
+  Description: string;
+  TimeStamp: string;
+  Serving_Size: number;
   TotalCalories: number;
-  ImageURL?:     string;
+  ImageURL?: string;
 }
 interface Ingredient { ingredientID: number; name: string; calories: number; unit: string; }
-interface Category   { categoryID: number; name: string; }
+interface Category { categoryID: number; name: string; }
 
 export default function RecipeDetail(): JSX.Element {
   const { id } = useParams<{ id: string }>();
-  const [recipe, setRecipe]         = useState<Recipe | null>(null);
+  const navigate = useNavigate();
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [categories, setCategories]   = useState<Category[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -30,9 +31,9 @@ export default function RecipeDetail(): JSX.Element {
           fetch(`/api/recipe/${id}/categories`)
         ]);
         if (!rRes.ok) throw new Error('Recipe not found');
-        const rData: Recipe       = await rRes.json();
+        const rData: Recipe = await rRes.json();
         const iData: Ingredient[] = await iRes.json();
-        const cData: Category[]   = await cRes.json();
+        const cData: Category[] = await cRes.json();
         setRecipe(rData);
         setIngredients(iData);
         setCategories(cData);
@@ -45,24 +46,74 @@ export default function RecipeDetail(): JSX.Element {
     load();
   }, [id]);
 
-  if (loading) return <p>Loading recipe…</p>;
-  if (error)   return <p style={{color:'red'}}>{error}</p>;
-  if (!recipe) return <p>Recipe not found.</p>;
+  if (loading) return <p className="text-center py-10 text-gray-600">Loading recipe…</p>;
+  if (error) return <p className="text-red-500 text-center mt-6">{error}</p>;
+  if (!recipe) return <p className="text-center py-10 text-gray-600">Recipe not found.</p>;
 
   return (
-    <div style={{ padding: 16 }}>
-      {recipe.ImageURL && <img src={recipe.ImageURL} alt={recipe.Title} style={{ width: '100%' }} />}
-      <h2>{recipe.Title}</h2>
-      <ul>
-        <li><strong>Ingredients:</strong>
-          <ul>{ingredients.map(i => <li key={i.ingredientID}>{i.name} ({i.calories} cal) [{i.unit}]</li>)}</ul>
-        </li>
-        <li><strong>Instructions:</strong><p>{recipe.Description}</p></li>
-        <li><strong>Calorie Info:</strong> {recipe.TotalCalories} kcal</li>
-        <li><strong>Category Tags:</strong> {categories.map(c => (<span key={c.categoryID}>{c.name} </span>))}</li>
-      </ul>
-      <button>Like</button>
-      <button style={{ marginLeft: 8 }}>Add to Tracker</button>
-    </div>
+    <>
+      {/* ✅ Navbar */}
+      <nav className="flex items-center justify-between px-8 py-4 bg-white shadow border-b border-gray-200">
+        <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
+        <div className="flex justify-start px-4 mt-4">
+        <button
+          onClick={() => navigate('/moderator')}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow"
+        >
+          ← Back to Dashboard
+        </button>
+        </div>
+      </nav>
+
+      {/* ✅ Recipe Content */}
+      <div className="min-h-screen bg-gray-50 px-6 py-10 flex justify-center">
+        <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-3xl border border-gray-200">
+          {recipe.ImageURL && (
+            <img src={recipe.ImageURL} alt={recipe.Title} className="w-full rounded-lg mb-6 object-cover max-h-64" />
+          )}
+
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">{recipe.Title}</h2>
+          <p className="text-sm text-gray-500 mb-4">{new Date(recipe.TimeStamp).toLocaleDateString()}</p>
+
+          <h3 className="text-lg font-semibold text-gray-700 mt-4 mb-2">🍴 Ingredients</h3>
+          <ul className="list-disc ml-6 mb-4">
+            {ingredients.map(i => (
+              <li key={i.ingredientID}>
+                {i.name} - {i.calories} cal [{i.unit}]
+              </li>
+            ))}
+          </ul>
+
+          <h3 className="text-lg font-semibold text-gray-700 mt-6 mb-2">📋 Instructions</h3>
+          <p className="text-gray-700 mb-6">{recipe.Description}</p>
+
+          <p className="text-gray-800 mb-4">
+            <strong>Total Calories:</strong> {recipe.TotalCalories} kcal
+          </p>
+
+          <p className="mb-6">
+            <strong className="text-gray-700">Tags:</strong>{' '}
+            {categories.map(c => (
+              <span
+                key={c.categoryID}
+                className="inline-block bg-blue-100 text-blue-700 text-xs font-medium mr-2 px-3 py-1 rounded-full"
+              >
+                {c.name}
+              </span>
+            ))}
+          </p>
+
+          {/* ✅ Buttons */}
+          <div className="flex gap-4">
+            <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md shadow">
+              ❤️ Like
+            </button>
+            <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md shadow">
+              ➕ Add to Tracker
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
