@@ -124,8 +124,9 @@ const CreateRecipe: React.FC = () => {
 
   return (
     <>
-      <nav className="flex items-center justify-start px-8 py-4 bg-white shadow border-b border-gray-200">
+      <nav className="flex items-center justify-between px-8 py-4 bg-white shadow border-b border-gray-200">
         <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
+        <div className="text-2xl font-extrabold text-blue-700 tracking-tight">Member</div>
       </nav>
       <div className="flex justify-start px-4 mt-4">
         <button
