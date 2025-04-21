@@ -380,34 +380,6 @@ def recipe_categories_api(recipe_id):
     rows = db.get_categories_for_recipe(recipe_id)
     cats = [{'categoryID': c[0], 'name': c[1]} for c in rows]
     return jsonify(cats)
-    
-
-# @app.route("/login", methods=["POST"])
-# def login():
-#     data = request.get_json()
-#     print("🔐 Received login request:", data)
-
-#     email = data.get("email")
-#     password = data.get("password")
-#     print("📩 Email:", email, "🔑 Password:", password)
-
-#     try:
-#         user = db.authenticate_user(email, password)
-#         print("🎯 DB User:", user)
-
-#         if user:
-#             return jsonify({
-#                 "userid": user[0],
-#                 "name": user[1],
-#                 "email": user[2],
-#                 "userflag": user[6],
-#                 "message": "Login successful"
-#             }), 200
-#         else:
-#             return jsonify({"message": "Invalid credentials"}), 401
-#     except Exception as e:
-#         print("❌ Login error:", e)
-#         return jsonify({"message": "Server error"}), 500
 
     
 # List all ingredients
@@ -495,5 +467,44 @@ def test(categoryid):
     
     return render_template("index.html")
 
+@app.route('/api/chart/approved-recipes')
+def chart_approved_recipes():
+    conn = db.get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT to_char(timestamp, 'YYYY-MM-DD') as date, COUNT(*) 
+        FROM Recipe
+        WHERE approved_status = TRUE
+        GROUP BY date
+        ORDER BY date;
+    """)
+    results = cur.fetchall()
+    cur.close(); conn.close()
+    return jsonify([{"date": r[0], "count": r[1]} for r in results])
+
+@app.route('/api/chart/approval-status')
+def chart_approval_status():
+    conn = db.get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT 
+            SUM(CASE WHEN approved_status = TRUE THEN 1 ELSE 0 END),
+            SUM(CASE WHEN approved_status = FALSE THEN 1 ELSE 0 END)
+        FROM Recipe;
+    """)
+    result = cur.fetchone()
+    cur.close(); conn.close()
+    return jsonify([
+        {"status": "Approved", "count": result[0]},
+        {"status": "Unapproved", "count": result[1]}
+    ])
+
+@app.route("/api/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return jsonify({"message": "Logged out"}), 200
+
+
+# ✅ Run Flask on port 5001
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

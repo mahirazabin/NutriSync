@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
-
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const MemberHome: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [userCalories, setUserCalories] = useState<number>(0);
-  const [member, setMember] = useState<{Name : string , recipe: 0} | null>(null);
+  const [member, setMember] = useState<{ Name: string; recipe: number } | null>(null);
 
   const fetchUserCalories = async () => {
     try {
       const res = await fetch(`/api/member/${id}/calorie`);
       const data = await res.json();
       setUserCalories(data[0]);
-    } catch (err) {
+    } catch {
       alert('Failed to fetch user calories');
     }
   };
@@ -23,7 +22,8 @@ const MemberHome: React.FC = () => {
       const res = await fetch(`/api/member/${id}`);
       const data = await res.json();
       setMember(data);
-    } catch (err) {
+      console.log("👤 Member API:", data);
+    } catch {
       alert('Failed to fetch member');
     }
   };
@@ -33,57 +33,81 @@ const MemberHome: React.FC = () => {
     fetchMember();
   }, []);
 
-  if (member === null) {
-    return <div>Loading...</div>;
-  }
+  const handleLogout = async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    navigate('/login');
+  };
+  if (member === null) return <div className="text-center py-10 text-gray-600">Loading...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      <div className="bg-white shadow-md rounded-xl p-6 mb-6 border">
-        <h2>
-        Hello, {member.Name}
-        </h2>
+    <>
+      {/* Simple Navbar */}
+      <nav className="flex items-center justify-between px-8 py-4 bg-white shadow border-b border-gray-200">
+        <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
+        <div className="flex items-center gap-4">
+          <span className="text-2xl font-extrabold text-blue-700 tracking-tight">Member</span>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded-md text-sm"
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+
+      <div className="min-h-screen bg-gray-50 px-6 py-10">
+        {/* Welcome card */}
+        <div className="bg-white p-6 rounded-xl shadow-md text-center mb-10 border border-gray-200">
+          <h1 className="text-3xl font-bold text-blue-700 mb-2">Welcome, {member.Name} 👋</h1>
+          <p className="text-gray-600">Here’s your recipe activity overview.</p>
+        </div>
+
+        {/* Analytics Table */}
+        <div className="bg-white p-6 rounded-lg shadow border border-gray-200 mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">📊 Your Analytics</h2>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="text-sm font-semibold text-gray-500 border-b">
+                <th className="py-2">Metric</th>
+                <th className="py-2">Value</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-700">
+              <tr className="border-b">
+                <td className="py-2">Recipes Added</td>
+                <td className="py-2">{member.recipe}</td>
+              </tr>
+              <tr>
+                <td className="py-2">Total Calories Tracked</td>
+                <td className="py-2">{userCalories}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link
+            to={`/member/${id}/search/`}
+            className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-center font-medium shadow"
+          >
+            🔍 Search Recipes
+          </Link>
+          <Link
+            to={`/member/${id}/create/`}
+            className="bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-center font-medium shadow"
+          >
+            ✍️ Create Recipe
+          </Link>
+          <Link
+            to={`/member/${id}/tracker/`}
+            className="bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg text-center font-medium shadow"
+          >
+            📈 Personal Tracker
+          </Link>
+        </div>
       </div>
-
-      <table >
-        <thead>
-          <tr>
-            <th>Analytics</th>
-            <th>Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Recipes added till now</td>
-            <td>{member.recipe}</td>
-          </tr>
-          <tr>
-            <td>Tracker</td>
-            <td>{userCalories}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <br /><br />
-
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <Link to={`/member/${id}/search/`}>
-            Search Recipes
-        </Link>
-
-        <br /><br />
-
-        <Link to={`/member/${id}/create/`}>
-            Create Recipes
-        </Link>
-
-        <br /><br />
-
-        <Link to={`/member/${id}/tracker/`}>
-            Personal Tracker
-        </Link>
-      </div>
-    </div>
+    </>
   );
 };
 
