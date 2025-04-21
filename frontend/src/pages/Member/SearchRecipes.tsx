@@ -1,10 +1,12 @@
 import { useState, useEffect, ChangeEvent, JSX } from 'react';
+import { useParams } from 'react-router-dom';
 
 interface Category { categoryID: number; name: string; }
 interface Ingredient { ingredientID: number; name: string; }
 interface RecipeCard { RecipeID: number; Title: string; Description: string; ImageURL?: string; }
 
 export default function SearchRecipes(): JSX.Element {
+  const { id } = useParams<{ id: string }>();
   const [categories, setCategories]   = useState<Category[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [selectedCategory, setSelectedCategory]   = useState<number | ''>('');
@@ -67,7 +69,7 @@ export default function SearchRecipes(): JSX.Element {
             {r.ImageURL && <img src={r.ImageURL} alt={r.Title} style={{ width: '100%', height: '120px', objectFit: 'cover' }}/>}            
             <h3>{r.Title}</h3>
             <p>{r.Description}</p>
-            <a href={`/recipes/${r.RecipeID}`}>View Recipe</a>
+            <a href={`/member/${id}/search/recipes/${r.RecipeID}`}>View Recipe</a>
           </div>
         ))}
       </div>

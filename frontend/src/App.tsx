@@ -33,7 +33,7 @@ function App() {
         <Route path={`/member/:id/create/`} element={<Create />} />
         <Route path={`/member/:id/tracker/`} element={<MemberTracker />} />
         <Route path="/member/:id/search" element={<SearchRecipes />} />
-        <Route path="/recipes/:id" element={<RecipePage />} />
+        <Route path="/member/:userid/search/recipes/:id" element={<RecipePage />} />
 
         
         <Route path="/moderator/:id/" element={<PrivateRoute allowedRoles={[2,1]}><ModeratorHome /></PrivateRoute>} />

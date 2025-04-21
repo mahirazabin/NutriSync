@@ -15,6 +15,7 @@ interface Category   { categoryID: number; name: string; }
 
 export default function RecipeDetail(): JSX.Element {
   const { id } = useParams<{ id: string }>();
+  const {userid} = useParams<{userid: string}>();
   const [recipe, setRecipe]         = useState<Recipe | null>(null);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [categories, setCategories]   = useState<Category[]>([]);
@@ -70,7 +71,7 @@ export default function RecipeDetail(): JSX.Element {
         <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
         <div className="flex justify-start px-4 mt-4">
         <button
-          onClick={() => navigate(`/member/${id}/search/`)}
+          onClick={() => navigate(`/member/${userid}/search/`)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow"
         >
           ← Back to Dashboard
