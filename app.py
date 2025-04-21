@@ -60,7 +60,6 @@ def login_api():
     email    = data.get('email')
     password = data.get('password')
     user = db.authenticate_user(email, password)
-    print(type(user))
     if not user:
         return jsonify({'error': 'Invalid credentials'}), 401
     session['user_id'] = user[0]
@@ -74,7 +73,6 @@ def login_api():
 def get_user_api():
     user_id = session.get('user_id')
     user_name = session.get('user_name')
-    print(user_name)
     role = session.get('role')
     if not user_id:
         return jsonify({'error': 'Not logged in'}), 401
@@ -286,7 +284,6 @@ def delete_tracked_recipe(userid, recipeid):
 @login_required
 def get_calories(id):
     calories = db.get_total_calories(id)
-    print(calories)
     if calories:
         return jsonify([int(calories)])
     else:
@@ -415,7 +412,6 @@ def view_all_moderators(id):
 def manage_user(id, action):
     data = request.get_json()
     user_id = data.get("user_ids")
-    print(user_id)
     if action == "assign":
         for uid in user_id:
             db.assign_member(uid, id)
@@ -588,14 +584,6 @@ def delete_category_api(category_id):
         return jsonify({'message': 'Category deleted'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
-@app.route("/test/<int:categoryid>")
-def test(categoryid):
-    print(db.view_category(categoryid))
-    print(db.delete_category(categoryid, 1))
-    db.create_category("Test Category", 1)
-    
-    return render_template("index.html")
 
 @app.route('/api/chart/approved-recipes')
 def chart_approved_recipes():
