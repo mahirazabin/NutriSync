@@ -13,10 +13,6 @@ load_dotenv()
 
 app.secret_key = os.getenv('secret_key', 'dev_key') 
 
-@app.route("/")
-def home():
-    return render_template("index.html")
-
 # Decorator to restrict access based on userflag in session
 def roles_required(*allowed_roles):
     def decorator(f):
@@ -97,27 +93,27 @@ def search_recipes_api():
     ]
     return jsonify(recipes)
 
-#Return all of the recipes created by that user (created only for now)
-@app.route('/api/user/recipes')
-@login_required
-@roles_required(3)
-def user_recipes_api():
-    user_id = session.get('user_id')
-    if not user_id:
-        return jsonify({'error': 'Not logged in'}), 401
+# Return all of the recipes created by that user (created only for now)
+# @app.route('/api/user/recipes')
+# @login_required
+# @roles_required(3)
+# def user_recipes_api():
+#     user_id = session.get('user_id')
+#     if not user_id:
+#         return jsonify({'error': 'Not logged in'}), 401
 
-    rows = db.get_recipes_by_user(user_id)
-    recipes = [{
-        'RecipeID':      row[0],
-        'Title':         row[1],
-        'Description':   row[2],
-        'TimeStamp':     row[3].isoformat() if hasattr(row[3], 'isoformat') else row[3],
-        'Serving_Size':  row[4],
-        'TotalCalories': row[5],
-        'ImageURL':      row[6],
-    } for row in rows]
+#     rows = db.get_recipes_by_user(user_id)
+#     recipes = [{
+#         'RecipeID':      row[0],
+#         'Title':         row[1],
+#         'Description':   row[2],
+#         'TimeStamp':     row[3].isoformat() if hasattr(row[3], 'isoformat') else row[3],
+#         'Serving_Size':  row[4],
+#         'TotalCalories': row[5],
+#         'ImageURL':      row[6],
+#     } for row in rows]
 
-    return jsonify(recipes), 200
+#     return jsonify(recipes), 200
 
 @app.route('/api/recipes/pending')
 @login_required
@@ -161,26 +157,6 @@ def recipe_page(recipe_id):
         "ImageURL": result[9]
     }
     return jsonify(recipe)
-
-    
-@app.route("/api/recipes/<int:recipe_id>", methods=["GET"])
-def recipe_api(recipe_id):
-    result = db.search_recipe(recipe_id)
-    if result:
-        recipe = {
-            "RecipeID": result[0],
-            "Title": result[1],
-            "Description": result[2],
-            "TimeStamp": result[3],
-            "Serving_Size": result[4],
-            "TotalCalories": result[5],
-            "AdderID": result[7],
-            "Approved_ModID": result[8],
-            "Approved_Status": result[9]
-        }
-        return jsonify(recipe), 200
-    else:
-        return jsonify({"message": "Recipe not found"})
 # -------------------------------------------------- RECIPES --------------------------------------------------
 @app.route("/api/member/<int:id>/ingredient", methods=["GET"])
 def get_ingredients(id):
@@ -272,7 +248,7 @@ def get_tracked_recipes(userid):
             recipes_json.append(x)
         return jsonify(recipes_json)
     else:
-        return jsonify([{"id": "0", "name": "—", "calories": 0}])
+        return jsonify([None])
 
 @app.route("/api/member/<int:userid>/tracker/delete/<int:recipeid>", methods=["DELETE"])
 @login_required
@@ -370,7 +346,7 @@ def admin_page(admin_id):
         }
         return jsonify(json_obj)
     else:
-        return jsonify({"adminName": "None", "analytics": "None"})
+        return jsonify(None)
 
 @app.route("/api/admin/<int:id>/manage-member/", methods=["GET"])
 @login_required
@@ -388,7 +364,7 @@ def view_all_members(id):
             members_json.append(x)
         return jsonify(members_json)
     else:
-        return jsonify([{"userID": "No Active Members", "name": "—", "email": "example@email.com"}])
+        return jsonify([None])
 
 @app.route("/api/admin/<int:id>/manage-moderator/", methods=["GET"])
 @login_required
@@ -438,6 +414,8 @@ def approve_recipe_api(recipe_id):
     except Exception as e:
         app.logger.exception("Error approving recipe")   
         return jsonify({ 'error': str(e) }), 500
+
+# ------------------------------------------------------------------------------------------------------------
 
 @app.route('/api/recipe/<int:recipe_id>/reject', methods=['POST'])
 @login_required
