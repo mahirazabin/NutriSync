@@ -1,27 +1,26 @@
 import { useState, useEffect, JSX } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface Recipe {
-  RecipeID: number;
-  Title: string;
-  Description: string;
-  TimeStamp: string;
-  Serving_Size: number;
+  RecipeID:      number;
+  Title:         string;
+  Description:   string;
+  TimeStamp:     string;
+  Serving_Size:  number;
   TotalCalories: number;
-  ImageURL?: string;
+  ImageURL?:     string;
 }
 interface Ingredient { ingredientID: number; name: string; calories: number; unit: string; }
-interface Category { categoryID: number; name: string; }
+interface Category   { categoryID: number; name: string; }
 
 export default function RecipeDetail(): JSX.Element {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [recipe, setRecipe]         = useState<Recipe | null>(null);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [categories, setCategories]   = useState<Category[]>([]);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState<string | null>(null);
-
+  const navigate = useNavigate();
    // Like handler
   const handleLike = async (): Promise<void> => {
     const res = await fetch(`/api/recipe/${id}/like`, { method: 'POST' });
@@ -45,9 +44,9 @@ export default function RecipeDetail(): JSX.Element {
           fetch(`/api/recipe/${id}/categories`)
         ]);
         if (!rRes.ok) throw new Error('Recipe not found');
-        const rData: Recipe = await rRes.json();
+        const rData: Recipe       = await rRes.json();
         const iData: Ingredient[] = await iRes.json();
-        const cData: Category[] = await cRes.json();
+        const cData: Category[]   = await cRes.json();
         setRecipe(rData);
         setIngredients(iData);
         setCategories(cData);
@@ -119,10 +118,10 @@ export default function RecipeDetail(): JSX.Element {
 
           {/* ✅ Buttons */}
           <div className="flex gap-4">
-            <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md shadow">
+            <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md shadow" onClick={handleLike}>
               ❤️ Like
             </button>
-            <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md shadow">
+            <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md shadow"onClick={handleTrack}>
               ➕ Add to Tracker
             </button>
           </div>
