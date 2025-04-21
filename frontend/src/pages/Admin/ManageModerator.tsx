@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const ManageModerator: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [moderators, setModerators] = useState<any[]>([]);
   const [selectedUserIDs, setSelectedUserIDs] = useState<string[]>([]);
 
@@ -46,12 +47,18 @@ const ManageModerator: React.FC = () => {
 
   return (
     <>
-      <nav className="flex items-center justify-start px-8 py-4 bg-white shadow border-b border-gray-200">
-        <div className="text-2xl font-extrabold text-blue-700 tracking-tight">
-          NutriSync
-        </div>
+      <nav className="flex items-center justify-between px-8 py-4 bg-white shadow border-b border-gray-200">
+        <div className="text-2xl font-extrabold text-blue-700">NutriSync</div>
+        <div className="text-2xl font-extrabold text-blue-700">Admin</div>
       </nav>
-
+      <div className="flex justify-start px-4 mt-4">
+        <button
+          onClick={() => navigate(`/admin/${id}`)}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium shadow"
+        >
+          ← Back to Home
+        </button>
+      </div>
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">

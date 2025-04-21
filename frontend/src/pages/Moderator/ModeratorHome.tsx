@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
   LineChart,
@@ -24,40 +24,60 @@ type PieData = {
 };
 
 export default function ModeratorHome() {
+  const navigate = useNavigate();
+
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [pieData, setPieData] = useState<PieData[]>([]);
+  const [moderatorData, setModeratorData] = useState<{ name: string } | null>(null);
 
   useEffect(() => {
-    // 📊 Load line chart data
-    fetch('/chart-data.json')
-      .then((res) => res.json())
-      .then((data) => setChartData(data))
-      .catch((err) => console.error('❌ Failed to load chart data:', err));
-
-    // 🥧 Load pie chart data
-    fetch('/approval-pie.json')
-      .then((res) => res.json())
-      .then((data) => setPieData(data))
-      .catch((err) => console.error('❌ Failed to load pie chart data:', err));
+    fetch('/api/user', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setModeratorData(data))
+      .catch(err => console.error("Failed to fetch moderator info:", err));
   }, []);
+
+  useEffect(() => {
+    fetch('/api/chart/approved-recipes', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setChartData(data))
+      .catch(err => console.error("Failed to fetch chart data:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/chart/approval-status', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setPieData(data))
+      .catch(err => console.error("Failed to fetch pie chart data:", err));
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    navigate('/login');
+  };
 
   const PIE_COLORS = ['#34d399', '#f87171']; // Approved: green, Unapproved: red
 
   return (
     <>
-      {/* Navbar with only logo */}
-      <nav className="flex items-center justify-start px-8 py-4 bg-white shadow border-b border-gray-200">
-        <div className="text-2xl font-extrabold text-blue-700 tracking-tight">
-          NutriSync
+      <nav className="flex items-center justify-between px-8 py-4 bg-white shadow border-b border-gray-200">
+        <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
+        <div className="flex items-center gap-6">
+          <div className="text-2xl font-extrabold text-blue-700 tracking-tight">Moderator</div>
+          <button
+            onClick={handleLogout}
+            className="text-sm bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+          >
+            Logout
+          </button>
         </div>
       </nav>
 
       <div className="min-h-screen bg-gray-50 p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Hello, Moderator 👋
+          Hello, {moderatorData?.name || 'Moderator'} 👋
         </h2>
 
-        {/* ✅ Line Chart: Approved Recipes Per Day */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Approved Recipes Per Day
@@ -81,7 +101,6 @@ export default function ModeratorHome() {
           )}
         </div>
 
-        {/* ✅ Pie Chart: Approved vs Unapproved */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Approval Status Breakdown
@@ -110,7 +129,6 @@ export default function ModeratorHome() {
           )}
         </div>
 
-        {/* 🔧 Action Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
             to="/moderator/ingredients"

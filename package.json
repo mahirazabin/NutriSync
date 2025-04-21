@@ -19,5 +19,5 @@
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.4"
   },
-  "proxy": "http://localhost:5000/"
+  "proxy": "http://localhost:5001/"
 }

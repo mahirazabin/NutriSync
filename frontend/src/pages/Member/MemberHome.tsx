@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const MemberHome: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [userCalories, setUserCalories] = useState<number>(0);
-  const [member, setMember] = useState<{ name: string; recipe: number } | null>(null);
+  const [member, setMember] = useState<{ Name: string; recipe: number } | null>(null);
 
   const fetchUserCalories = async () => {
     try {
@@ -21,6 +22,7 @@ const MemberHome: React.FC = () => {
       const res = await fetch(`/api/member/${id}`);
       const data = await res.json();
       setMember(data);
+      console.log("👤 Member API:", data);
     } catch {
       alert('Failed to fetch member');
     }
@@ -31,19 +33,32 @@ const MemberHome: React.FC = () => {
     fetchMember();
   }, []);
 
+  const handleLogout = async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    navigate('/login');
+  };
   if (member === null) return <div className="text-center py-10 text-gray-600">Loading...</div>;
 
   return (
     <>
       {/* Simple Navbar */}
-      <nav className="bg-white shadow px-6 py-4 border-b border-gray-200">
+      <nav className="flex items-center justify-between px-8 py-4 bg-white shadow border-b border-gray-200">
         <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
+        <div className="flex items-center gap-4">
+          <span className="text-2xl font-extrabold text-blue-700 tracking-tight">Member</span>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded-md text-sm"
+          >
+            Logout
+          </button>
+        </div>
       </nav>
 
       <div className="min-h-screen bg-gray-50 px-6 py-10">
         {/* Welcome card */}
         <div className="bg-white p-6 rounded-xl shadow-md text-center mb-10 border border-gray-200">
-          <h1 className="text-3xl font-bold text-blue-700 mb-2">Welcome, {member.name} 👋</h1>
+          <h1 className="text-3xl font-bold text-blue-700 mb-2">Welcome, {member.Name} 👋</h1>
           <p className="text-gray-600">Here’s your recipe activity overview.</p>
         </div>
 
