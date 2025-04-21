@@ -24,6 +24,7 @@ type PieData = {
 };
 
 export default function ModeratorHome() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [chartData, setChartData] = useState<ChartData[]>([]);

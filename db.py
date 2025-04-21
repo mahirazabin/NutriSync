@@ -142,7 +142,7 @@ def authenticate_admin(email, password):
         cursor.close()
         conn.close()
         if result:
-            return (result[0], result[1],0,0,0,0, 3)
+            return (result[0], result[1],0,0,0,0, 1)
         return None
     except Exception as e:
         print(f"Authentication Error: {e}")
@@ -560,6 +560,26 @@ def get_tracked_recipes_by_id(userID):
         return result
     except Exception as e:
         print(f"Get Tracked Recipes Error: {e}")
+        
+# Tracks recipe
+def insert_recipe_tracking(user_id, recipe_id):
+    rec = search_recipe (recipe_id)
+    if not rec:
+        return
+    calories = rec[5]
+    try:
+        conn = get_connection(); cur = conn.cursor()
+        cur.execute(
+            '''
+            INSERT INTO recipe_contained_tracking (userID, recipeID, calories)
+            VALUES (%s, %s, %s);
+            ''', (user_id, recipe_id, calories)
+        )
+        conn.commit()
+        cur.close(); conn.close()
+    except Exception as e:
+        print(f"insert_recipe_tracking Error: {e}")
+        raise
 
 def view_recipe_ingredient(recipeID):
     try:
@@ -631,6 +651,57 @@ def get_all_categories():
     except Exception as e:
         print(f"get_all_categories Error: {e}")
         return []
+
+# Search recipes by optional category and/or ingredient
+def search_recipes(category_id: int = None, ingredient_id: int = None):
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        base = ["SELECT DISTINCT R.recipeID, R.title, R.description, R.image_url",
+                "FROM Recipe R"]
+        joins = []
+        filters = ["R.approved_status = TRUE"]
+        params = []
+
+        if ingredient_id:
+            joins.append(
+                "JOIN ingredients_contains_recipe CIR ON R.recipeID = CIR.recipeID"
+            )
+            filters.append("CIR.ingredientID = %s")
+            params.append(ingredient_id)
+        if category_id:
+            joins.append(
+                "JOIN category_belongs_recipe CBR ON R.recipeID = CBR.recipeID"
+            )
+            filters.append("CBR.categoryID = %s")
+            params.append(category_id)
+
+        sql = " ".join(base + joins + ["WHERE " + " AND ".join(filters)]) + ";"
+        cur.execute(sql, tuple(params))
+        rows = cur.fetchall()
+        cur.close(); conn.close()
+        return rows
+    except Exception as e:
+        print(f"search_recipes Error: {e}")
+        return []
+
+def get_calories_by_recipe(recipe_id):
+    """
+    Return the stored total calories for a single recipe from the Recipe table.
+    """
+    try:
+        conn = get_connection()
+        cur  = conn.cursor()
+        cur.execute(
+            "SELECT totalcalories FROM Recipe WHERE recipeID = %s;",
+            (recipe_id,)
+        )
+        row = cur.fetchone()
+        cur.close(); conn.close()
+        return float(row[0]) if row and row[0] is not None else 0.0
+    except Exception as e:
+        print(f"get_calories_by_recipe Error: {e}")
+        return 0.0
 
 def create_category(name , userID):
     try:
@@ -763,24 +834,24 @@ def create_recipe(recipe_id, title, description, serving_size, total_calories, a
     except Exception as e:
         print(f"View Recipe Category Error: {e}")
 
-def track_recipe(userID, recipeID, servingSize):
+def update_calories(userID, calories):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        recipe = search_recipe(recipeID)
-        totalCalories = (recipe[5]/recipe[4]) * servingSize
-        query = """
-            UPDATE calorie_tracking
-            SET totalcalories = totalcalories + %s
-            WHERE userid = %s;
-        """
-        cursor.execute(query, (servingSize, userID))
+        cursor.execute(
+            '''
+            INSERT INTO calorie_tracking (userID, totalcalories)
+            VALUES (%s, %s)
+            ON CONFLICT (userID)
+            DO UPDATE SET totalcalories = calorie_tracking.totalcalories + %s;
+            ''', (userID, calories, calories)
+        )
         conn.commit()
         cursor.close()
         conn.close()
     except Exception as e:
         print(f"Track Recipe Error: {e}")
-        print(f"Approve Recipe Error: {e}")
+
 
 def create_recipe(title, description, serving_size, total_calories, adder_id, image_url):
     try:
@@ -834,7 +905,7 @@ def like_recipe(user_id, recipe_id):
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            INSERT INTO Like (UserID, RecipeID, TimeStamp)
+            INSERT INTO "Like" (UserID, RecipeID, TimeStamp)
             VALUES (%s, %s, NOW());
         """
         cursor.execute(query, (user_id, recipe_id))
@@ -843,7 +914,6 @@ def like_recipe(user_id, recipe_id):
         conn.close()
     except Exception as e:
         print(f"Like Recipe Error: {e}")
-        print(f"Track Recipe Error: {e}")
 
 def view_all_members():
     try:
@@ -934,6 +1004,7 @@ def get_admin_by_id(admin_id):
     except Exception as e:
         print(f"Get Admin by ID Error: {e}")
 
+# userflag numbers might be off
 def assign_member(user_id, admin_id):
     try:
         if get_admin_by_id(admin_id) is not None:

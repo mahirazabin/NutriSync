@@ -18,9 +18,23 @@ export default function RecipeDetail(): JSX.Element {
   const navigate = useNavigate();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories]   = useState<Category[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState<string | null>(null);
+
+   // Like handler
+  const handleLike = async (): Promise<void> => {
+    const res = await fetch(`/api/recipe/${id}/like`, { method: 'POST' });
+    if (!res.ok) alert('Error liking recipe');
+    else alert('Liked!');
+  };
+
+  // Track handler
+  const handleTrack = async (): Promise<void> => {
+    const res = await fetch(`/api/recipe/${id}/track`, { method: 'POST' });
+    if (!res.ok) alert('Error tracking');
+    else alert('Calories added to tracker!');
+  };
 
   useEffect(() => {
     async function load() {

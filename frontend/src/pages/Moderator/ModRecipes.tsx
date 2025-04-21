@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 interface Recipe {
@@ -7,7 +8,8 @@ interface Recipe {
   Description: string;
 }
 
-export default function ModRecipes() {
+export default function ModRecipes(): JSX.Element {
+  const { id } = useParams<{ id: string }>();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [moderatorName, setModeratorName] = useState<string>('Moderator');
   const [loading, setLoading] = useState<boolean>(true);
