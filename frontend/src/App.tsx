@@ -36,7 +36,7 @@ function App() {
         <Route path="/recipes/:id" element={<RecipePage />} />
 
         
-        <Route path="/moderator/:id" element={<PrivateRoute allowedRoles={[2,1]}><ModeratorHome /></PrivateRoute>} />
+        <Route path="/moderator/:id/" element={<PrivateRoute allowedRoles={[2,1]}><ModeratorHome /></PrivateRoute>} />
         <Route path="/moderator/:id/recipes/" element={<PrivateRoute allowedRoles={[2,1]}><ModRecipes /></PrivateRoute>} />
         <Route path="/moderator/:id/ingredients/" element={<PrivateRoute allowedRoles={[2,1]}><ModIngredients /></PrivateRoute>} />
         <Route path="/moderator/:id/categories/" element={<PrivateRoute allowedRoles={[2,1]}><ModCategories /></PrivateRoute>} />

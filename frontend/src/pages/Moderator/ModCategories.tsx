@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent, JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 
@@ -145,7 +145,7 @@ export default function ModCategories(): JSX.Element {
           {/* 🔙 Back to Dashboard */}
           <div className="mt-10">
             <button
-              onClick={() => navigate('/moderator')}
+              onClick={() => navigate(`/moderator/${id}`)}
               className="text-blue-600 hover:underline text-sm"
             >
               ← Back to Dashboard

@@ -48,7 +48,7 @@ def signup_api():
     if not all([name, email, password, phone_no]):
         return jsonify({'error': 'Missing fields'}), 400
     try:
-        db.create_user(name, email, phone_no, password, None, 1) # 3 is member, 2 is mod, 1 is admin
+        db.create_user(name, email, phone_no, password, None, 3) # 3 is member, 2 is mod, 1 is admin
         return jsonify({'message': 'User created'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -410,6 +410,26 @@ def view_all_moderators(id):
         return jsonify(moderator_json)
     else:
         return jsonify({"message": "No Members Found"})    
+
+@app.route("/api/admin/<int:id>/<string:action>", methods=["POST"])
+def manage_user(id, action):
+    data = request.get_json()
+    user_id = data.get("user_ids")
+    print(user_id)
+    if action == "assign":
+        for uid in user_id:
+            db.assign_member(uid, id)
+        return jsonify({"message": "User approved successfully"})
+    elif action == "blacklist":
+        for uid in user_id:
+            db.ban_user(uid, id)
+        return jsonify({"message": "User banned successfully"})
+    elif action == "unassign":
+        for uid in user_id:
+            db.unassign_moderator(uid, id)
+        return jsonify({"message": "User unbanned successfully"})
+    else:
+        return jsonify({"message": "Invalid action"}), 400
 
 @app.route('/api/recipe/<int:recipe_id>/approve', methods=['POST'])
 @login_required

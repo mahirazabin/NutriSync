@@ -163,7 +163,7 @@ def update_user_info(userid, name=None, email=None, phone_no=None, password=None
             updates.append("email = %s")
             params.append(email)
         if phone_no:
-            updates.append("phone_no = %s")
+            updates.append("phoneno = %s")
             params.append(phone_no)
         if password:
             updates.append("password = %s")
@@ -174,7 +174,7 @@ def update_user_info(userid, name=None, email=None, phone_no=None, password=None
             return False
 
         query = f"""
-            UPDATE "user"
+            UPDATE "User"
             SET {', '.join(updates)}
             WHERE userid = %s;
         """
@@ -921,7 +921,7 @@ def view_all_members():
         cursor = conn.cursor()
         query = """
             SELECT userid, name, email FROM "User"
-            WHERE userflag = 1;
+            WHERE userflag = 3;
         """
         cursor.execute(query)
         result = cursor.fetchall()
@@ -937,7 +937,7 @@ def view_all_moderators():
         cursor = conn.cursor()
         query = """
             SELECT userid, name, email FROM "User"
-            WHERE userflag = 2;
+            WHERE userflag = 2; 
         """
         cursor.execute(query)
         result = cursor.fetchall()
@@ -1034,7 +1034,7 @@ def unassign_moderator(user_id, admin_id):
             cursor = conn.cursor()
             query = """
                 UPDATE "User"
-                SET userflag = 1
+                SET userflag = 3
                 WHERE userid = %s;
             """
             cursor.execute(query, (user_id,))

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
   LineChart,
@@ -29,7 +29,7 @@ export default function ModeratorHome() {
 
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [pieData, setPieData] = useState<PieData[]>([]);
-  const [moderatorData, setModeratorData] = useState<{ name: string } | null>(null);
+  const [moderatorData, setModeratorData] = useState<{ UserID: string, UserName: string, Role: string } | null>(null);
 
   useEffect(() => {
     fetch('/api/user', { credentials: 'include' })
@@ -76,7 +76,7 @@ export default function ModeratorHome() {
 
       <div className="min-h-screen bg-gray-50 p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Hello, {moderatorData?.name || 'Moderator'} 👋
+          Hello, {moderatorData?.UserName || 'Moderator'} 👋
         </h2>
 
         <div className="bg-white rounded-lg shadow p-6 mb-8">
@@ -132,19 +132,19 @@ export default function ModeratorHome() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
-            to="/moderator/ingredients"
+            to={`/moderator/${id}/ingredients`}
             className="bg-blue-600 text-white py-3 px-4 rounded-md text-center hover:bg-blue-700 transition"
           >
             Manage Ingredients
           </Link>
           <Link
-            to="/moderator/categories"
+            to={`/moderator/${id}/categories`}
             className="bg-blue-600 text-white py-3 px-4 rounded-md text-center hover:bg-blue-700 transition"
           >
             Manage Categories
           </Link>
           <Link
-            to="/moderator/recipes"
+            to={`/moderator/${id}/recipes`}
             className="bg-blue-600 text-white py-3 px-4 rounded-md text-center hover:bg-blue-700 transition"
           >
             View Unapproved Recipes

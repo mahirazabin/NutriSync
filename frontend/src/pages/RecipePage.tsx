@@ -71,7 +71,7 @@ export default function RecipeDetail(): JSX.Element {
         <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
         <div className="flex justify-start px-4 mt-4">
         <button
-          onClick={() => navigate('/moderator')}
+          onClick={() => navigate(`/member/${id}/search/`)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow"
         >
           ← Back to Dashboard
