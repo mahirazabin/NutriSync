@@ -99,7 +99,7 @@ def delete_user(userid):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        query = "DELETE FROM \"user\" WHERE userid = %s;"
+        query = "DELETE FROM \"User\" WHERE userid = %s;"
         cursor.execute(query, (userid,))
         conn.commit()
         cursor.close()
@@ -862,6 +862,27 @@ def like_recipe(user_id, recipe_id):
         conn.close()
     except Exception as e:
         print(f"Like Recipe Error: {e}")
+        
+def delete_like(user_id: int, recipe_id: int):
+    """
+    Remove a like entry for this user and recipe.
+    """
+    try:
+        conn = get_connection()
+        cur  = conn.cursor()
+        cur.execute(
+            """
+            DELETE FROM "Like"
+            WHERE userID = %s AND recipeID = %s;
+            """,
+            (user_id, recipe_id)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"delete_like Error: {e}")
+        raise
 
 def view_all_members():
     try:
