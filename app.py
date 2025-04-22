@@ -160,7 +160,7 @@ def recipe_page(recipe_id):
 # -------------------------------------------------- RECIPES --------------------------------------------------
 @app.route("/api/member/<int:id>/ingredient", methods=["GET"])
 def get_ingredients(id):
-    ingredients = db.get_all_ingredient()
+    ingredients = db.get_all_ingredients()
     if ingredients:
         ingredients_json = []
         for ingredient in ingredients:
