@@ -21,17 +21,25 @@ export default function RecipeDetail(): JSX.Element {
   const [categories, setCategories]   = useState<Category[]>([]);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState<string | null>(null);
+  const [servingSize, setServingSize] = useState<number>(1);
   const navigate = useNavigate();
-   // Like handler
+
   const handleLike = async (): Promise<void> => {
     const res = await fetch(`/api/recipe/${id}/like`, { method: 'POST' });
     if (!res.ok) alert('Error liking recipe');
     else alert('Liked!');
   };
 
-  // Track handler
   const handleTrack = async (): Promise<void> => {
-    const res = await fetch(`/api/recipe/${id}/track`, { method: 'POST' });
+    if (servingSize < 1) {
+      alert('Serving size must be at least 1.');
+      return;
+    }
+    const res = await fetch(`/api/recipe/${id}/track`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ servingSize })
+    });
     if (!res.ok) alert('Error tracking');
     else alert('Calories added to tracker!');
   };
@@ -66,7 +74,6 @@ export default function RecipeDetail(): JSX.Element {
 
   return (
     <>
-      {/* ✅ Navbar */}
       <nav className="flex items-center justify-between px-8 py-4 bg-white shadow border-b border-gray-200">
         <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
         <div className="flex justify-start px-4 mt-4">
@@ -79,7 +86,6 @@ export default function RecipeDetail(): JSX.Element {
         </div>
       </nav>
 
-      {/* ✅ Recipe Content */}
       <div className="min-h-screen bg-gray-50 px-6 py-10 flex justify-center">
         <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-3xl border border-gray-200">
           {recipe.ImageURL && (
@@ -117,7 +123,21 @@ export default function RecipeDetail(): JSX.Element {
             ))}
           </p>
 
-          {/* ✅ Buttons */}
+          <div className="mb-6">
+            <label htmlFor="servingSize" className="block text-gray-700 font-medium mb-2">
+              Enter Serving Size
+            </label>
+            <input
+              type="number"
+              id="servingSize"
+              min="1"
+              value={servingSize}
+              onChange={(e) => setServingSize(Math.max(1, parseInt(e.target.value) || 1))}
+              required
+              className="w-full mb-4 px-4 py-2 border border-gray-300 rounded"
+            />
+          </div>
+
           <div className="flex gap-4">
             <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md shadow" onClick={handleLike}>
               ❤️ Like
