@@ -43,17 +43,28 @@ const MemberHome: React.FC = () => {
     <>
       {/* Simple Navbar */}
       <nav className="flex items-center justify-between px-8 py-4 bg-white shadow border-b border-gray-200">
-        <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
-        <div className="flex items-center gap-4">
-          <span className="text-2xl font-extrabold text-blue-700 tracking-tight">Member</span>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded-md text-sm"
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
+  <div className="text-2xl font-extrabold text-blue-700 tracking-tight">NutriSync</div>
+  <div className="flex items-center gap-4">
+    
+    <span className="text-2xl font-extrabold text-blue-700 tracking-tight">Member</span>
+    <Link
+      to={`/member/${id}/profile`}
+      title="View Profile"
+      className="w-9 h-9 rounded-full bg-blue-100 hover:bg-blue-200 flex items-center justify-center text-blue-700 font-bold shadow-sm transition duration-200"
+    >
+      👤
+    </Link>
+
+    <button
+      onClick={handleLogout}
+      className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded-md text-sm"
+    >
+      Logout
+    </button>
+  </div>
+</nav>
+
+
 
       <div className="min-h-screen bg-gray-50 px-6 py-10">
         {/* Welcome card */}
