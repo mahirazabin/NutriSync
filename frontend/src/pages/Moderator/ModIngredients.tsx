@@ -13,7 +13,7 @@ interface Ingredient {
 export default function ModIngredients(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [form, setForm] = useState({ name: '', calories: 0, unit: '', moderatorID: 123 });
+  const [form, setForm] = useState({ name: '', calories: 0, unit: '', moderatorID: id });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [moderatorName, setModeratorName] = useState<string>('');

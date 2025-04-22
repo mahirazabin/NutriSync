@@ -11,7 +11,7 @@ interface Category {
 export default function ModCategories(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [form, setForm] = useState({ name: '', moderatorID: 123 });
+  const [form, setForm] = useState({ name: '', moderatorID: id });
   const [moderatorName, setModeratorName] = useState<string>('Moderator');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

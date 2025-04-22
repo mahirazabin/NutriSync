@@ -502,7 +502,7 @@ def create_ingredient_api():
     name = data.get('name')
     calories = data.get('calories')
     unit = data.get('unit')
-    moderator_id = 123 # Placeholder
+    moderator_id = data.get('moderatorID')
     if not all([name, isinstance(calories, int), moderator_id]):
         return jsonify({'error': 'Missing name, calories, or moderatorID'}), 400
     try:
