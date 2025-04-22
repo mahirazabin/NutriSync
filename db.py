@@ -956,10 +956,11 @@ def assign_member(user_id, admin_id):
             cursor = conn.cursor()
             query = """
                 UPDATE "User"
-                SET userflag = 2
+                SET userflag = 2,
+                    aid = %s
                 WHERE userid = %s;
             """
-            cursor.execute(query, (user_id,))
+            cursor.execute(query, (admin_id,user_id))
             conn.commit()
             cursor.close()
             conn.close()
@@ -978,10 +979,11 @@ def unassign_moderator(user_id, admin_id):
             cursor = conn.cursor()
             query = """
                 UPDATE "User"
-                SET userflag = 3
+                SET userflag = 3,
+                    aid = %s
                 WHERE userid = %s;
             """
-            cursor.execute(query, (user_id,))
+            cursor.execute(query, (admin_id,user_id))
             conn.commit()
             cursor.close()
             conn.close()
