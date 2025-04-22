@@ -927,7 +927,7 @@ def admin_analytics_past_30_days():
         counts["ingredients"] = result[0]
 
         query = """
-            SELECT COUNT(*) FROM Ingredient
+            SELECT COUNT(*) FROM Category
         """
         cursor.execute(query)
         result = cursor.fetchone()
