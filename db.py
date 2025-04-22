@@ -530,18 +530,14 @@ def get_tracked_recipes_by_id(userID):
         print(f"Get Tracked Recipes Error: {e}")
         
 # Tracks recipe
-def insert_recipe_tracking(user_id, recipe_id):
-    rec = search_recipe (recipe_id)
-    if not rec:
-        return
-    calories = rec[5]
+def insert_recipe_tracking(user_id, recipe_id, totalcal):
     try:
         conn = get_connection(); cur = conn.cursor()
         cur.execute(
             '''
             INSERT INTO recipe_contained_tracking (userID, recipeID, calories)
             VALUES (%s, %s, %s);
-            ''', (user_id, recipe_id, calories)
+            ''', (user_id, recipe_id, totalcal)
         )
         conn.commit()
         cur.close(); conn.close()
@@ -661,7 +657,7 @@ def get_calories_by_recipe(recipe_id):
         conn = get_connection()
         cur  = conn.cursor()
         cur.execute(
-            "SELECT totalcalories FROM Recipe WHERE recipeID = %s;",
+            "SELECT totalcalories/servingsize FROM Recipe WHERE recipeID = %s;",
             (recipe_id,)
         )
         row = cur.fetchone()

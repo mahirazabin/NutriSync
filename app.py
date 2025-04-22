@@ -467,12 +467,14 @@ def like_recipe_api(recipe_id):
 @login_required
 def track_recipe_api(recipe_id):
     user_id = session.get('user_id')
+    serving_size = int(request.json.get('servingSize', 1))
     try:
-        db.insert_recipe_tracking(user_id, recipe_id)
         calories = db.get_calories_by_recipe(recipe_id)
-        db.update_calories(user_id, calories)
+        db.insert_recipe_tracking(user_id, recipe_id, calories * serving_size)
+        db.update_calories(user_id, calories * serving_size)
         return jsonify({'message': 'Calories tracked'}), 200
     except Exception as e:
+        print(e)
         return jsonify({'error': str(e)}), 500
     
 # List all ingredients
