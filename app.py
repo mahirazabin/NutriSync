@@ -600,7 +600,6 @@ def logout():
     session.clear()
     return jsonify({"message": "Logged out"}), 200
 
-
 # ✅ Run Flask on port 5001
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
