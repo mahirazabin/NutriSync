@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, render_template, session
 import db
+from functools import wraps
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -12,9 +13,25 @@ load_dotenv()
 
 app.secret_key = os.getenv('secret_key', 'dev_key') 
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+# Decorator to restrict access based on userflag in session
+def roles_required(*allowed_roles):
+    def decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            role = session.get('role')
+            if role not in allowed_roles:
+                return jsonify({'error': 'Forbidden'}), 403
+            return f(*args, **kwargs)
+        return wrapped
+    return decorator
+
+def login_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
+        return f(*args, **kwargs)
+    return wrapped
 
 # Signup a new member
 @app.route('/api/signup', methods=['POST'])
@@ -27,7 +44,7 @@ def signup_api():
     if not all([name, email, password, phone_no]):
         return jsonify({'error': 'Missing fields'}), 400
     try:
-        db.create_user(name, email, phone_no, password, None, 1) # 3 is member, 2 is mod, 1 is admin
+        db.create_user(name, email, phone_no, password, None, 3) # 3 is member, 2 is mod, 1 is admin
         return jsonify({'message': 'User created'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -39,7 +56,6 @@ def login_api():
     email    = data.get('email')
     password = data.get('password')
     user = db.authenticate_user(email, password)
-    print(type(user))
     if not user:
         return jsonify({'error': 'Invalid credentials'}), 401
     session['user_id'] = user[0]
@@ -49,36 +65,59 @@ def login_api():
     
 # Tell the front end who’s logged in
 @app.route('/api/user')
+@login_required
 def get_user_api():
     user_id = session.get('user_id')
     user_name = session.get('user_name')
-    print(user_name)
     role = session.get('role')
     if not user_id:
         return jsonify({'error': 'Not logged in'}), 401
     return jsonify({'UserID': user_id, 'UserName': user_name, 'Role': role}), 200
 
-#Return all of the recipes created by that user (created only for now)
-@app.route('/api/user/recipes')
-def user_recipes_api():
-    user_id = session.get('user_id')
-    if not user_id:
-        return jsonify({'error': 'Not logged in'}), 401
+# Search & filter recipes based on category and/or ingredient
+@app.route('/api/recipes/search')
+@login_required
+@roles_required(1,2,3)
+def search_recipes_api():
+    category_id   = request.args.get('category_id', type=int)
+    ingredient_id = request.args.get('ingredient_id', type=int)
+    rows = db.search_recipes(category_id, ingredient_id)
+    recipes = [
+        {
+            'RecipeID':    r[0],
+            'Title':       r[1],
+            'Description': r[2],
+            'ImageURL':    r[3]
+        }
+        for r in rows
+    ]
+    return jsonify(recipes)
 
-    rows = db.get_recipes_by_user(user_id)
-    recipes = [{
-        'RecipeID':      row[0],
-        'Title':         row[1],
-        'Description':   row[2],
-        'TimeStamp':     row[3].isoformat() if hasattr(row[3], 'isoformat') else row[3],
-        'Serving_Size':  row[4],
-        'TotalCalories': row[5],
-        'ImageURL':      row[6],
-    } for row in rows]
+# Return all of the recipes created by that user (created only for now)
+# @app.route('/api/user/recipes')
+# @login_required
+# @roles_required(3)
+# def user_recipes_api():
+#     user_id = session.get('user_id')
+#     if not user_id:
+#         return jsonify({'error': 'Not logged in'}), 401
 
-    return jsonify(recipes), 200
+#     rows = db.get_recipes_by_user(user_id)
+#     recipes = [{
+#         'RecipeID':      row[0],
+#         'Title':         row[1],
+#         'Description':   row[2],
+#         'TimeStamp':     row[3].isoformat() if hasattr(row[3], 'isoformat') else row[3],
+#         'Serving_Size':  row[4],
+#         'TotalCalories': row[5],
+#         'ImageURL':      row[6],
+#     } for row in rows]
+
+#     return jsonify(recipes), 200
 
 @app.route('/api/recipes/pending')
+@login_required
+@roles_required(2, 1)
 def list_pending_recipes():
     rows = db.list_all_pending_recipes()
 
@@ -99,6 +138,7 @@ def list_pending_recipes():
 
 
 @app.route("/api/recipes/<int:recipe_id>")
+@login_required
 def recipe_page(recipe_id):
     result = db.search_recipe(recipe_id)
     if not result:
@@ -117,30 +157,10 @@ def recipe_page(recipe_id):
         "ImageURL": result[9]
     }
     return jsonify(recipe)
-
-    
-@app.route("/api/recipes/<int:recipe_id>", methods=["GET"])
-def recipe_api(recipe_id):
-    result = db.search_recipe(recipe_id)
-    if result:
-        recipe = {
-            "RecipeID": result[0],
-            "Title": result[1],
-            "Description": result[2],
-            "TimeStamp": result[3],
-            "Serving_Size": result[4],
-            "TotalCalories": result[5],
-            "AdderID": result[7],
-            "Approved_ModID": result[8],
-            "Approved_Status": result[9]
-        }
-        return jsonify(recipe), 200
-    else:
-        return jsonify({"message": "Recipe not found"})
 # -------------------------------------------------- RECIPES --------------------------------------------------
 @app.route("/api/member/<int:id>/ingredient", methods=["GET"])
 def get_ingredients(id):
-    ingredients = db.get_all_ingredient()
+    ingredients = db.get_all_ingredients()
     if ingredients:
         ingredients_json = []
         for ingredient in ingredients:
@@ -169,6 +189,7 @@ def get_categories(id):
         return jsonify([{"message": "No Categories Found"}])
     
 @app.route("/api/member/<int:id>/add-recipe", methods=["POST"])
+@login_required
 def add_recipe(id):
     data = request.get_json()
     title = data.get("title")
@@ -194,7 +215,12 @@ def add_recipe(id):
 # -------------------------------------------------- MEMBER --------------------------------------------------
 
 @app.route("/api/member/<int:id>", methods=["GET"])
+@login_required
+@roles_required(3)
 def member_page(id):
+    if session['user_id'] != id:
+        return jsonify({'error':'Forbidden'}), 403
+    
     analytics = db.member_added_recipe_count(id)[0]
     member = db.get_user(id)
     if member:
@@ -208,6 +234,7 @@ def member_page(id):
         return None
     
 @app.route("/api/member/<int:userid>/tracker/recipe", methods=["GET"])
+@login_required
 def get_tracked_recipes(userid):
     recipes = db.get_tracked_recipes_by_id(userid)
     if recipes:
@@ -221,23 +248,25 @@ def get_tracked_recipes(userid):
             recipes_json.append(x)
         return jsonify(recipes_json)
     else:
-        return jsonify([{"id": "0", "name": "—", "calories": 0}])
+        return jsonify([None])
 
 @app.route("/api/member/<int:userid>/tracker/delete/<int:recipeid>", methods=["DELETE"])
+@login_required
 def delete_tracked_recipe(userid, recipeid):
     if userid != 0:
         db.remove_recipe_from_tracker(userid, recipeid)
 
 @app.route("/api/member/<int:id>/calorie", methods=["GET"])
+@login_required
 def get_calories(id):
     calories = db.get_total_calories(id)
-    print(calories)
     if calories:
         return jsonify([int(calories)])
     else:
         return jsonify([0])
 
 @app.route("/api/member/<int:userid>/profile", methods=["GET"])
+@login_required
 def get_profile(userid):
     user = db.get_user(userid)
     if user:
@@ -254,10 +283,12 @@ def get_profile(userid):
         return None
     
 @app.route("/api/member/<int:userid>/profile/update", methods=["POST"])
+@login_required
 def update_profile(userid):
     db.update_user_info(userid, request.json["name"], request.json["email"], request.json["phoneno"], request.json["password"])
 
 @app.route("/api/member/<int:userid>/recipe", methods=["GET"])
+@login_required
 def get_user_recipes(userid):
     recipes = db.get_recipes_of_user(userid)
     if recipes:
@@ -277,6 +308,7 @@ def get_user_recipes(userid):
         return jsonify([{"id": "—", "name": "—", "servings": 0 , "calories": 0, "approved": 0, "image": "—"}])
 
 @app.route("/api/member/<int:userid>/liked", methods=["GET"])
+@login_required
 def get_liked_recipes(userid):
     recipes = db.get_liked_recipes(userid)
     if recipes:
@@ -298,7 +330,12 @@ def get_liked_recipes(userid):
 # -------------------------------------------------- ADMIN --------------------------------------------------
 
 @app.route("/api/admin/<int:admin_id>", methods=["GET"])
+@login_required
+@roles_required(1)
 def admin_page(admin_id):
+    if session['user_id'] != admin_id:
+        return jsonify({'error':'Forbidden'}), 403
+    
     analytics = db.admin_analytics_past_30_days()
     admin = db.get_admin_by_id(admin_id)
     if admin:
@@ -309,9 +346,11 @@ def admin_page(admin_id):
         }
         return jsonify(json_obj)
     else:
-        return jsonify({"adminName": "None", "analytics": "None"})
+        return jsonify(None)
 
 @app.route("/api/admin/<int:id>/manage-member/", methods=["GET"])
+@login_required
+@roles_required(1)
 def view_all_members(id):
     members = db.view_all_members()
     if members:
@@ -325,9 +364,11 @@ def view_all_members(id):
             members_json.append(x)
         return jsonify(members_json)
     else:
-        return jsonify([{"userID": "No Active Members", "name": "—", "email": "example@email.com"}])
+        return jsonify([None])
 
 @app.route("/api/admin/<int:id>/manage-moderator/", methods=["GET"])
+@login_required
+@roles_required(1)
 def view_all_moderators(id):
     moderators = db.view_all_moderators()
     if moderators:
@@ -343,7 +384,28 @@ def view_all_moderators(id):
     else:
         return jsonify({"message": "No Members Found"})    
 
+@app.route("/api/admin/<int:id>/<string:action>", methods=["POST"])
+def manage_user(id, action):
+    data = request.get_json()
+    user_id = data.get("user_ids")
+    if action == "assign":
+        for uid in user_id:
+            db.assign_member(uid, id)
+        return jsonify({"message": "User approved successfully"})
+    elif action == "blacklist":
+        for uid in user_id:
+            db.ban_user(uid, id)
+        return jsonify({"message": "User banned successfully"})
+    elif action == "unassign":
+        for uid in user_id:
+            db.unassign_moderator(uid, id)
+        return jsonify({"message": "User unbanned successfully"})
+    else:
+        return jsonify({"message": "Invalid action"}), 400
+
 @app.route('/api/recipe/<int:recipe_id>/approve', methods=['POST'])
+@login_required
+@roles_required(2,1)
 def approve_recipe_api(recipe_id):
     mod_id = 123   # Placeholder
     try:
@@ -353,7 +415,11 @@ def approve_recipe_api(recipe_id):
         app.logger.exception("Error approving recipe")   
         return jsonify({ 'error': str(e) }), 500
 
+# ------------------------------------------------------------------------------------------------------------
+
 @app.route('/api/recipe/<int:recipe_id>/reject', methods=['POST'])
+@login_required
+@roles_required(2,1)
 def reject_recipe_api(recipe_id):
     """
     Reject (delete) a pending recipe.
@@ -366,6 +432,7 @@ def reject_recipe_api(recipe_id):
     
 # Ingredients list for recipe
 @app.route('/api/recipe/<int:recipe_id>/ingredients')
+@login_required
 def recipe_ingredients_api(recipe_id):
     rows = db.view_recipe_ingredient(recipe_id)
     items = [
@@ -376,14 +443,41 @@ def recipe_ingredients_api(recipe_id):
 
 # Categories list for recipe
 @app.route('/api/recipe/<int:recipe_id>/categories')
+@login_required
 def recipe_categories_api(recipe_id):
     rows = db.get_categories_for_recipe(recipe_id)
     cats = [{'categoryID': c[0], 'name': c[1]} for c in rows]
     return jsonify(cats)
 
     
+# Like a recipe
+@app.route('/api/recipe/<int:recipe_id>/like', methods=['POST'])
+@login_required
+@roles_required(1,2,3)
+def like_recipe_api(recipe_id):
+    user_id = session.get('user_id')
+    try:
+        db.like_recipe(user_id, recipe_id)
+        return jsonify({'message': 'Recipe liked'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Add recipe calories to tracker
+@app.route('/api/recipe/<int:recipe_id>/track', methods=['POST'])
+@login_required
+def track_recipe_api(recipe_id):
+    user_id = session.get('user_id')
+    try:
+        db.insert_recipe_tracking(user_id, recipe_id)
+        calories = db.get_calories_by_recipe(recipe_id)
+        db.update_calories(user_id, calories)
+        return jsonify({'message': 'Calories tracked'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 # List all ingredients
 @app.route('/api/ingredients')
+@login_required
 def list_ingredients():
     rows = db.get_all_ingredients()
     ingredients = [
@@ -399,6 +493,8 @@ def list_ingredients():
 
 # Create a new ingredient
 @app.route('/api/ingredient', methods=['POST'])
+@login_required
+@roles_required(1,2)
 def create_ingredient_api():
     data = request.get_json() or {}
     name = data.get('name')
@@ -415,6 +511,8 @@ def create_ingredient_api():
     
 # Delete an ingredient
 @app.route('/api/ingredient/<int:ingredient_id>', methods=['DELETE'])
+@login_required
+@roles_required(1,2)
 def delete_ingredient_api(ingredient_id):
     try:
         db.delete_ingredient(ingredient_id, 123)
@@ -425,6 +523,8 @@ def delete_ingredient_api(ingredient_id):
     
 # List all categories
 @app.route('/api/categories')
+@login_required
+@roles_required(1,2,3)
 def list_categories():
     rows = db.get_all_categories()
     categories = [
@@ -438,6 +538,8 @@ def list_categories():
 
 # Create a new category
 @app.route('/api/category', methods=['POST'])
+@login_required
+@roles_required(1,2)
 def create_category_api():
     data = request.get_json() or {}
     name = data.get('name')
@@ -452,20 +554,14 @@ def create_category_api():
 
 # Delete a category
 @app.route('/api/category/<int:category_id>', methods=['DELETE'])
+@login_required
+@roles_required(1,2)
 def delete_category_api(category_id):
     try:
         db.delete_category(category_id, 123)
         return jsonify({'message': 'Category deleted'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
-@app.route("/test/<int:categoryid>")
-def test(categoryid):
-    print(db.view_category(categoryid))
-    print(db.delete_category(categoryid, 1))
-    db.create_category("Test Category", 1)
-    
-    return render_template("index.html")
 
 @app.route('/api/chart/approved-recipes')
 def chart_approved_recipes():

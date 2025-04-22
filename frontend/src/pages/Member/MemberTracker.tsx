@@ -22,7 +22,9 @@ const MemberTracker: React.FC = () => {
     try {
       const res = await fetch(`/api/member/${id}/tracker/recipe`);
       const data = await res.json();
-      setRecipes(data);
+      if (data[0] != null){
+        setRecipes(data);
+      }
     } catch (err) {
       alert('Failed to fetch recipes');
     }

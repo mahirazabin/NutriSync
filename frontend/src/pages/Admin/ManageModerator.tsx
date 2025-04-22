@@ -7,13 +7,16 @@ const ManageModerator: React.FC = () => {
   const [moderators, setModerators] = useState<any[]>([]);
   const [selectedUserIDs, setSelectedUserIDs] = useState<string[]>([]);
 
-  const fetchModerator = () => {
-    fetch(`/api/admin/${id}/manage-moderator/`)
-      .then((res) => res.json())
-      .then((data) => setModerators(data))
-      .catch((err) =>
-        console.error('Failed to fetch moderator data', err)
-      );
+  const fetchModerator = async () => {
+    try{
+      const res = await fetch(`/api/admin/${id}/manage-moderator/`);
+      const data = await res.json();
+        if (data[0] != null){
+          setModerators(data);
+        }
+    }catch(err) {
+      alert('Failed to fetch moderators');
+    }
   };
 
   useEffect(() => {
@@ -76,7 +79,12 @@ const ManageModerator: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {moderators.map((moderator) => (
+              {moderators.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-6 text-gray-500">No Moderators Found.</td>
+                  </tr>
+                ) : (
+                moderators.map((moderator) => (
                   <tr
                     key={moderator.userID}
                     className="hover:bg-blue-50 transition"
@@ -97,7 +105,8 @@ const ManageModerator: React.FC = () => {
                     <td className="px-4 py-2 border">{moderator.name}</td>
                     <td className="px-4 py-2 border">{moderator.email}</td>
                   </tr>
-                ))}
+                )))
+              }
               </tbody>
             </table>
           </div>

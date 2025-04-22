@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, JSX } from 'react';
+import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 interface Recipe {
@@ -7,7 +8,8 @@ interface Recipe {
   Description: string;
 }
 
-export default function ModRecipes() {
+export default function ModRecipes(): JSX.Element {
+  const { id } = useParams<{ id: string }>();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [moderatorName, setModeratorName] = useState<string>('Moderator');
   const [loading, setLoading] = useState<boolean>(true);
@@ -80,7 +82,7 @@ export default function ModRecipes() {
       </nav>
       <div className="flex justify-start px-4 mt-4">
       <button
-      onClick={() => navigate('/moderator')}
+      onClick={() => navigate(`/moderator/${id}/`)}
       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow"
     >
       ← Back to Dashboard

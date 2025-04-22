@@ -6,15 +6,17 @@ const ManageMember: React.FC = () => {
   const navigate = useNavigate();
   const [members, setMembers] = useState<any[]>([]);
   const [selectedUserIDs, setSelectedUserIDs] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchMembers = () => {
-    setLoading(true);
-    fetch(`/api/admin/${id}/manage-member/`)
-      .then((res) => res.json())
-      .then((data) => setMembers(data))
-      .catch((err) => console.error("Failed to fetch members data", err))
-      .finally(() => setLoading(false));
+  const fetchMembers = async () => {
+    try{
+      const res = await fetch(`/api/admin/${id}/manage-member/`);
+      const data = await res.json();
+        if (data[0] != null){
+          setMembers(data);
+        }
+    }catch(err) {
+      alert('Failed to fetch members');
+    }
   };
 
   useEffect(() => {
@@ -63,10 +65,6 @@ const ManageMember: React.FC = () => {
       <div className="min-h-screen bg-gray-50 px-6 py-10">
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 mb-4">🧑‍💻 Manage Members</h2>
-
-          {loading ? (
-            <div className="text-gray-500 text-center py-8">Loading members...</div>
-          ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto border border-gray-300">
                 <thead className="bg-gray-100">
@@ -78,7 +76,12 @@ const ManageMember: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {members.map((member) => (
+                {members.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-6 text-gray-500">No Members Found.</td>
+                  </tr>
+                ) : (
+                  members.map((member) => (
                     <tr key={member.userID} className="hover:bg-gray-50 transition">
                       <td className="px-4 py-2 border text-center">
                         <input
@@ -91,7 +94,7 @@ const ManageMember: React.FC = () => {
                       <td className="px-4 py-2 border">{member.name}</td>
                       <td className="px-4 py-2 border">{member.email}</td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
 
@@ -113,7 +116,6 @@ const ManageMember: React.FC = () => {
                 </button>
               </div>
             </div>
-          )}
         </div>
       </div>
     </>

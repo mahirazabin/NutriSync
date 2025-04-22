@@ -1,5 +1,6 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent, JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 interface Category {
   categoryID: number;
@@ -7,7 +8,8 @@ interface Category {
   moderatorID: number;
 }
 
-export default function ModCategories() {
+export default function ModCategories(): JSX.Element {
+  const { id } = useParams<{ id: string }>();
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ name: '', moderatorID: 123 });
   const [moderatorName, setModeratorName] = useState<string>('Moderator');
@@ -143,7 +145,7 @@ export default function ModCategories() {
           {/* 🔙 Back to Dashboard */}
           <div className="mt-10">
             <button
-              onClick={() => navigate('/moderator')}
+              onClick={() => navigate(`/moderator/${id}`)}
               className="text-blue-600 hover:underline text-sm"
             >
               ← Back to Dashboard

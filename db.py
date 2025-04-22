@@ -15,33 +15,33 @@ def get_connection():
         port=result.port
     )
     
-def create_admin(admin_id, name, email, password):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = "INSERT INTO Admin VALUES (%s, %s, %s, %s);"
-        cursor.execute(query, (admin_id, name, email, password))
-        conn.commit()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        print(f"Create Admin Error: {e}")  
+# def create_admin(admin_id, name, email, password):
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         query = "INSERT INTO Admin VALUES (%s, %s, %s, %s);"
+#         cursor.execute(query, (admin_id, name, email, password))
+#         conn.commit()
+#         cursor.close()
+#         conn.close()
+#     except Exception as e:
+#         print(f"Create Admin Error: {e}")  
     
-def update_admin(admin_id, name, email, password):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-            UPDATE Admin
-            SET Name = %s, Email = %s, Password = %s
-            WHERE AdminID = %s;
-        """
-        cursor.execute(query, (name, email, password, admin_id))
-        conn.commit()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        print(f"Update Admin Error: {e}")
+# def update_admin(admin_id, name, email, password):
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         query = """
+#             UPDATE Admin
+#             SET Name = %s, Email = %s, Password = %s
+#             WHERE AdminID = %s;
+#         """
+#         cursor.execute(query, (name, email, password, admin_id))
+#         conn.commit()
+#         cursor.close()
+#         conn.close()
+#     except Exception as e:
+#         print(f"Update Admin Error: {e}")
 
 def create_user(name, email, phone_no, password, aid, user_flag):
     try:
@@ -76,23 +76,23 @@ def get_user(userid):
         print(f"Get User Error: {e}")
         return None
     
-def get_users_by_role(role):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-            SELECT userid, name, email, phone_no, aid
-            FROM "user"
-            WHERE userflag = %s;
-        """
-        cursor.execute(query, (role,))
-        result = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return result
-    except Exception as e:
-        print(f"Get Users by Role Error: {e}")
-        return []
+# def get_users_by_role(role):
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         query = """
+#             SELECT userid, name, email, phone_no, aid
+#             FROM "user"
+#             WHERE userflag = %s;
+#         """
+#         cursor.execute(query, (role,))
+#         result = cursor.fetchall()
+#         cursor.close()
+#         conn.close()
+#         return result
+#     except Exception as e:
+#         print(f"Get Users by Role Error: {e}")
+#         return []
 
 
 def delete_user(userid):
@@ -142,7 +142,7 @@ def authenticate_admin(email, password):
         cursor.close()
         conn.close()
         if result:
-            return (result[0], result[1],0,0,0,0, 3)
+            return (result[0], result[1],0,0,0,0, 1)
         return None
     except Exception as e:
         print(f"Authentication Error: {e}")
@@ -163,7 +163,7 @@ def update_user_info(userid, name=None, email=None, phone_no=None, password=None
             updates.append("email = %s")
             params.append(email)
         if phone_no:
-            updates.append("phone_no = %s")
+            updates.append("phoneno = %s")
             params.append(phone_no)
         if password:
             updates.append("password = %s")
@@ -174,7 +174,7 @@ def update_user_info(userid, name=None, email=None, phone_no=None, password=None
             return False
 
         query = f"""
-            UPDATE "user"
+            UPDATE "User"
             SET {', '.join(updates)}
             WHERE userid = %s;
         """
@@ -368,18 +368,18 @@ def get_all_ingredients():
         return []
 
        
-def select_ingredients(ingredient_id):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
-        cursor.execute(query, (ingredient_id,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return result
-    except Exception as e:
-        print(f"approve_recipe Error: {e}")
+# def select_ingredients(ingredient_id):
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
+#         cursor.execute(query, (ingredient_id,))
+#         result = cursor.fetchone()
+#         cursor.close()
+#         conn.close()
+#         return result
+#     except Exception as e:
+#         print(f"approve_recipe Error: {e}")
 
 def create_ingredient(name , calories, unit, userID):
     try:
@@ -408,38 +408,6 @@ def create_ingredient(name , calories, unit, userID):
     except Exception as e:
         print(f"Create Ingredient Error: {e}")
         return None
-    
-
-def get_all_ingredient():
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-            SELECT ingredientid, name, calories, unit, moderatorid
-            FROM ingredient;
-        """
-        cursor.execute(query)
-        result = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return result
-    except Exception as e:
-        print(f"View Ingredient Error: {e}")
-       
-def get_ingredient_by_id(ingredient_id):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
-        cursor.execute(query, (ingredient_id,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return result
-    except Exception as e:
-        print(f"Select Ingredients Error: {e}")
-        return None
-
 
 # Approve a recipe by setting Approved_Status = TRUE
 def approve_recipe(recipe_id: int, approved_mod_id: int) -> None:
@@ -480,7 +448,7 @@ def reject_recipe(recipe_id: int) -> None:
 #         query = "SELECT Name FROM Category WHERE CategoryID = %s;"
 #         cursor.execute(query, (category_id,))
 #         print(f"View Ingredient Error: {e}")
-        print(f"View Ingredient Error: {e}")
+#         print(f"View Ingredient Error: {e}")
     
 def remove_recipe_from_tracker(userID, recipeID):
     try:
@@ -560,6 +528,26 @@ def get_tracked_recipes_by_id(userID):
         return result
     except Exception as e:
         print(f"Get Tracked Recipes Error: {e}")
+        
+# Tracks recipe
+def insert_recipe_tracking(user_id, recipe_id):
+    rec = search_recipe (recipe_id)
+    if not rec:
+        return
+    calories = rec[5]
+    try:
+        conn = get_connection(); cur = conn.cursor()
+        cur.execute(
+            '''
+            INSERT INTO recipe_contained_tracking (userID, recipeID, calories)
+            VALUES (%s, %s, %s);
+            ''', (user_id, recipe_id, calories)
+        )
+        conn.commit()
+        cur.close(); conn.close()
+    except Exception as e:
+        print(f"insert_recipe_tracking Error: {e}")
+        raise
 
 def view_recipe_ingredient(recipeID):
     try:
@@ -632,6 +620,57 @@ def get_all_categories():
         print(f"get_all_categories Error: {e}")
         return []
 
+# Search recipes by optional category and/or ingredient
+def search_recipes(category_id: int = None, ingredient_id: int = None):
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        base = ["SELECT DISTINCT R.recipeID, R.title, R.description, R.image_url",
+                "FROM Recipe R"]
+        joins = []
+        filters = ["R.approved_status = TRUE"]
+        params = []
+
+        if ingredient_id:
+            joins.append(
+                "JOIN ingredients_contains_recipe CIR ON R.recipeID = CIR.recipeID"
+            )
+            filters.append("CIR.ingredientID = %s")
+            params.append(ingredient_id)
+        if category_id:
+            joins.append(
+                "JOIN category_belongs_recipe CBR ON R.recipeID = CBR.recipeID"
+            )
+            filters.append("CBR.categoryID = %s")
+            params.append(category_id)
+
+        sql = " ".join(base + joins + ["WHERE " + " AND ".join(filters)]) + ";"
+        cur.execute(sql, tuple(params))
+        rows = cur.fetchall()
+        cur.close(); conn.close()
+        return rows
+    except Exception as e:
+        print(f"search_recipes Error: {e}")
+        return []
+
+def get_calories_by_recipe(recipe_id):
+    """
+    Return the stored total calories for a single recipe from the Recipe table.
+    """
+    try:
+        conn = get_connection()
+        cur  = conn.cursor()
+        cur.execute(
+            "SELECT totalcalories FROM Recipe WHERE recipeID = %s;",
+            (recipe_id,)
+        )
+        row = cur.fetchone()
+        cur.close(); conn.close()
+        return float(row[0]) if row and row[0] is not None else 0.0
+    except Exception as e:
+        print(f"get_calories_by_recipe Error: {e}")
+        return 0.0
+
 def create_category(name , userID):
     try:
         conn = get_connection()
@@ -703,19 +742,19 @@ def get_all_category():
     except Exception as e:
         print(f"View Category Error: {e}")
 
-def get_category_by_id(category_id):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = "SELECT Name FROM Category WHERE CategoryID = %s;"
-        cursor.execute(query, (category_id,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return result
-    except Exception as e:
-        print(f"Select Category Error: {e}")
-        return None
+# def get_category_by_id(category_id):
+#     try:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         query = "SELECT Name FROM Category WHERE CategoryID = %s;"
+#         cursor.execute(query, (category_id,))
+#         result = cursor.fetchone()
+#         cursor.close()
+#         conn.close()
+#         return result
+#     except Exception as e:
+#         print(f"Select Category Error: {e}")
+#         return None
 
 # def approve_recipe(recipe_id, approved_mod_id, approved_status):
 #         print(f"View Category Error: {e}")
@@ -763,43 +802,23 @@ def create_recipe(recipe_id, title, description, serving_size, total_calories, a
     except Exception as e:
         print(f"View Recipe Category Error: {e}")
 
-def track_recipe(userID, recipeID, servingSize):
+def update_calories(userID, calories):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        recipe = search_recipe(recipeID)
-        totalCalories = (recipe[5]/recipe[4]) * servingSize
-        query = """
-            UPDATE calorie_tracking
-            SET totalcalories = totalcalories + %s
-            WHERE userid = %s;
-        """
-        cursor.execute(query, (servingSize, userID))
+        cursor.execute(
+            '''
+            INSERT INTO calorie_tracking (userID, totalcalories)
+            VALUES (%s, %s)
+            ON CONFLICT (userID)
+            DO UPDATE SET totalcalories = calorie_tracking.totalcalories + %s;
+            ''', (userID, calories, calories)
+        )
         conn.commit()
         cursor.close()
         conn.close()
     except Exception as e:
         print(f"Track Recipe Error: {e}")
-        print(f"Approve Recipe Error: {e}")
-
-def create_recipe(title, description, serving_size, total_calories, adder_id, image_url):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-            INSERT INTO Recipe(title, description, timestamp, servingsize, 
-                   totalcalories, adderid, approved_modid, approved_status, image_url)
-            VALUES (%s, %s, NOW(), %s, %s, %s, null, False, %s)
-            RETURNING recipeid;
-        """
-        cursor.execute(query, (title, description, serving_size, total_calories, adder_id, image_url))
-        conn.commit()
-        recipe_id = cursor.fetchone()[0]
-        cursor.close()
-        conn.close()
-        return recipe_id
-    except Exception as e:
-        print(f"Create Recipe Error: {e}")
 
 def get_calories(ingredientName):
     try:
@@ -834,7 +853,7 @@ def like_recipe(user_id, recipe_id):
         conn = get_connection()
         cursor = conn.cursor()
         query = """
-            INSERT INTO Like (UserID, RecipeID, TimeStamp)
+            INSERT INTO "Like" (UserID, RecipeID, TimeStamp)
             VALUES (%s, %s, NOW());
         """
         cursor.execute(query, (user_id, recipe_id))
@@ -843,7 +862,6 @@ def like_recipe(user_id, recipe_id):
         conn.close()
     except Exception as e:
         print(f"Like Recipe Error: {e}")
-        print(f"Track Recipe Error: {e}")
 
 def view_all_members():
     try:
@@ -851,7 +869,7 @@ def view_all_members():
         cursor = conn.cursor()
         query = """
             SELECT userid, name, email FROM "User"
-            WHERE userflag = 1;
+            WHERE userflag = 3;
         """
         cursor.execute(query)
         result = cursor.fetchall()
@@ -867,7 +885,7 @@ def view_all_moderators():
         cursor = conn.cursor()
         query = """
             SELECT userid, name, email FROM "User"
-            WHERE userflag = 2;
+            WHERE userflag = 2; 
         """
         cursor.execute(query)
         result = cursor.fetchall()
@@ -934,6 +952,7 @@ def get_admin_by_id(admin_id):
     except Exception as e:
         print(f"Get Admin by ID Error: {e}")
 
+# userflag numbers might be off
 def assign_member(user_id, admin_id):
     try:
         if get_admin_by_id(admin_id) is not None:
@@ -963,7 +982,7 @@ def unassign_moderator(user_id, admin_id):
             cursor = conn.cursor()
             query = """
                 UPDATE "User"
-                SET userflag = 1
+                SET userflag = 3
                 WHERE userid = %s;
             """
             cursor.execute(query, (user_id,))
