@@ -206,7 +206,6 @@ def update_admin(admin_id, name, email, password):
     except Exception as e:
         print(f"Update Admin Error: {e}")
 
-
 def list_all_pending_recipes():
     try:
         conn = get_connection()
@@ -774,29 +773,24 @@ def get_categories_for_recipe(recipe_id):
         return []
     
     
-def create_recipe(recipe_id, title, description, serving_size, total_calories, adder_id, image_url):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-            INSERT INTO Recipe(recipeid, title, description, timestamp, servingsize, 
-                   totalcalories, adderid, approved_modid, approved_status, image_url)
-            VALUES (%s, %s, %s, NOW(), %s, %s, %s, False, %s);
-        """
-        cursor.execute(query, (recipe_id, title, description, serving_size, total_calories, adder_id, image_url))
-        """
-            SELECT C.categoryid, C.name, C.moderatorid
-            FROM category_belongs_recipe B
-            JOIN category C ON B.categoryid = C.categoryid
-            WHERE B.recipeid = %s;
-        """
-        cursor.execute(query, (recipe_id,))
-        result = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return result
-    except Exception as e:
-        print(f"View Recipe Category Error: {e}")
+def create_recipe(title, description, serving_size, total_calories, adder_id, image_url):
+     try:
+         conn = get_connection()
+         cursor = conn.cursor()
+         query = """
+             INSERT INTO Recipe(title, description, timestamp, servingsize, 
+                    totalcalories, adderid, approved_modid, approved_status, image_url)
+             VALUES (%s, %s, NOW(), %s, %s, %s, null, False, %s)
+             RETURNING recipeid;
+         """
+         cursor.execute(query, (title, description, serving_size, total_calories, adder_id, image_url))
+         conn.commit()
+         recipe_id = cursor.fetchone()[0]
+         cursor.close()
+         conn.close()
+         return recipe_id
+     except Exception as e:
+         print(f"Create Recipe Error: {e}")
 
 def update_calories(userID, calories):
     try:
