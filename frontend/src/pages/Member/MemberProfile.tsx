@@ -59,6 +59,15 @@ const MemberProfile: React.FC = () => {
     }
   };
 
+  const handleDeleteProfile = async () => {
+    const res = await fetch(`/api/member/${id}/profile`, { method: 'DELETE' });
+    if (!res.ok) {
+      alert('Unable to delete profile');
+      return;
+    }
+    navigate('/signup');
+  };
+
   const handleSave = async () => {
     try {
       await fetch(`/api/member/${id}/profile/update`, {
@@ -117,6 +126,12 @@ const MemberProfile: React.FC = () => {
                   Edit Profile
                 </button>
               )}
+              <button
+              onClick={handleDeleteProfile}
+              className="mt-4 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded"
+            >
+              Delete Profile
+            </button>
             </div>
           </div>
 
@@ -132,6 +147,27 @@ const MemberProfile: React.FC = () => {
                     <p>Servings: {r.servings}</p>
                     <p>Calories: {r.calories}</p>
                     <p>Status: <span className={r.approved ? 'text-green-600' : 'text-yellow-600'}>{r.approved ? 'Approved' : 'Pending'}</span></p>
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm('Delete this recipe?')) return;
+                        const res = await fetch(
+                          `/api/member/${id}/recipe/${r.id}`,
+                          { method: 'DELETE' }
+                        );
+                        if (res.status === 409) {
+                          alert('Cannot delete: recipe is being tracked');
+                          return;
+                        }
+                        if (!res.ok) {
+                          alert('Delete failed');
+                          return;
+                        }
+                        setUserRecipes(prev => prev.filter(x => x.id !== r.id));
+                      }}
+                      className="mt-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Remove Recipe
+                    </button>
                   </div>
                 </div>
               ))}
@@ -142,16 +178,33 @@ const MemberProfile: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
             <h3 className="text-xl font-semibold mb-4">❤️ Liked Recipes</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {likedRecipes.map((r) => (
-                <div key={r.id} className="border rounded-lg overflow-hidden shadow-sm">
-                  <img src={r.image} alt={r.name} className="w-full h-32 object-cover" />
-                  <div className="p-4">
-                    <h4 className="font-bold text-lg">{r.name}</h4>
-                    <p>Servings: {r.servings}</p>
-                    <p>Calories: {r.calories}</p>
-                  </div>
-                </div>
-              ))}
+            {likedRecipes.map((r) => (
+            <div key={r.id} className="border rounded-lg overflow-hidden shadow-sm">
+              <img src={r.image} alt={r.name} className="w-full h-32 object-cover" />
+              <div className="p-4">
+                <h4 className="font-bold text-lg">{r.name}</h4>
+                <p>Servings: {r.servings}</p>
+                <p>Calories: {r.calories}</p>
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(`/api/recipe/${r.id}/unlike`, {
+                        method: 'POST'
+                      });
+                      if (!res.ok) throw new Error('Unable to unlike');
+                      setLikedRecipes(prev => prev.filter(x => x.id !== r.id));
+                      alert('Like removed');
+                    } catch (err: any) {
+                      alert(err.message);
+                    }
+                  }}
+                  className="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm"
+                >
+                  Unlike
+                </button>
+              </div>
+            </div>
+          ))}
             </div>
           </div>
         </div>

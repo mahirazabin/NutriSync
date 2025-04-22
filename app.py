@@ -511,18 +511,6 @@ def create_ingredient_api():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-# Delete an ingredient
-@app.route('/api/ingredient/<int:ingredient_id>', methods=['DELETE'])
-@login_required
-@roles_required(1,2)
-def delete_ingredient_api(ingredient_id):
-    try:
-        db.delete_ingredient(ingredient_id, 123)
-        return jsonify({'message': 'Ingredient deleted'}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-    
 # List all categories
 @app.route('/api/categories')
 @login_required
@@ -551,17 +539,6 @@ def create_category_api():
     try:
         db.create_category(name, moderator_id)
         return jsonify({'message': 'Category created'}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# Delete a category
-@app.route('/api/category/<int:category_id>', methods=['DELETE'])
-@login_required
-@roles_required(1,2)
-def delete_category_api(category_id):
-    try:
-        db.delete_category(category_id, 123)
-        return jsonify({'message': 'Category deleted'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -596,6 +573,51 @@ def chart_approval_status():
         {"status": "Approved", "count": result[0]},
         {"status": "Unapproved", "count": result[1]}
     ])
+    
+# Delete a category
+@app.route('/api/category/<int:category_id>', methods=['DELETE'])
+@login_required
+@roles_required(1,2)
+def delete_category_api(category_id):
+    try:
+        db.delete_category(category_id, 123)
+        return jsonify({'message': 'Category deleted'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Delete an ingredient
+@app.route('/api/ingredient/<int:ingredient_id>', methods=['DELETE'])
+@login_required
+@roles_required(1,2)
+def delete_ingredient_api(ingredient_id):
+    try:
+        db.delete_ingredient(ingredient_id, 123)
+        return jsonify({'message': 'Ingredient deleted'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Delete user profile
+@app.route('/api/member/<int:user_id>/profile', methods=['DELETE'])
+@login_required
+def delete_profile_api(user_id):
+    db.delete_user(user_id)
+    session.clear()
+    return jsonify({'message':'Profile deleted'}),200
+
+# Delete member recipe
+@app.route('/api/member/<int:user_id>/recipe/<int:recipe_id>', methods=['DELETE'])
+@login_required
+def delete_member_recipe_api(user_id, recipe_id):
+    db.delete_recipe(recipe_id)
+    return jsonify({'message':'Recipe deleted'}),200
+
+# Unlike a recipe
+@app.route('/api/recipe/<int:recipe_id>/unlike', methods=['POST'])
+@login_required
+def unlike_recipe_api(recipe_id):
+    user_id = session['user_id']
+    db.delete_like(user_id, recipe_id)
+    return jsonify({'message':'Like removed'}),200
 
 @app.route("/api/logout", methods=["POST"])
 def logout():
