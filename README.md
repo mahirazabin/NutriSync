@@ -17,7 +17,7 @@ Welcome to **NutriSync**, a full-stack nutrition tracking platform designed to h
 ### 1. **Clone the Repository**
 
 ```bash
-git clone https://github.com/yourusername/nutrisync.git
+git clone https://github.com/mahirazabin/NutriSync.git
 cd nutrisync
 ```
 
