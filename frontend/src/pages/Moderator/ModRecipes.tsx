@@ -49,7 +49,7 @@ export default function ModRecipes(): JSX.Element {
       const res = await fetch(`/api/recipe/${recipeId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({moderatorID : id}),
       });
       if (!res.ok) throw new Error('Approval failed');
       setRecipes(prev => prev.filter(r => r.RecipeID !== recipeId));

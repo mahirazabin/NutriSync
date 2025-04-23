@@ -415,8 +415,8 @@ def approve_recipe(recipe_id: int, approved_mod_id: int) -> None:
         cur = conn.cursor()
         cur.execute("""
             UPDATE Recipe
-            SET Approved_ModID = %s,
-                Approved_Status = TRUE
+            SET approved_modid = %s,
+                approved_status = TRUE
             WHERE RecipeID = %s;
         """, (approved_mod_id, recipe_id))
         conn.commit()
