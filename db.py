@@ -415,8 +415,8 @@ def approve_recipe(recipe_id: int, approved_mod_id: int) -> None:
         cur = conn.cursor()
         cur.execute("""
             UPDATE Recipe
-            SET Approved_ModID = %s,
-                Approved_Status = TRUE
+            SET approved_modid = %s,
+                approved_status = TRUE
             WHERE RecipeID = %s;
         """, (approved_mod_id, recipe_id))
         conn.commit()
@@ -927,7 +927,7 @@ def admin_analytics_past_30_days():
         counts["ingredients"] = result[0]
 
         query = """
-            SELECT COUNT(*) FROM Ingredient
+            SELECT COUNT(*) FROM Category
         """
         cursor.execute(query)
         result = cursor.fetchone()

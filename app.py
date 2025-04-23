@@ -407,7 +407,7 @@ def manage_user(id, action):
 @login_required
 @roles_required(2,1)
 def approve_recipe_api(recipe_id):
-    mod_id = 123   # Placeholder
+    mod_id = request.get_json().get("moderatorID")
     try:
         db.approve_recipe(recipe_id, mod_id)
         return jsonify({ 'message': 'Recipe approved', 'RecipeID': recipe_id }), 200
@@ -502,7 +502,7 @@ def create_ingredient_api():
     name = data.get('name')
     calories = data.get('calories')
     unit = data.get('unit')
-    moderator_id = 123 # Placeholder
+    moderator_id = data.get('moderatorID')
     if not all([name, isinstance(calories, int), moderator_id]):
         return jsonify({'error': 'Missing name, calories, or moderatorID'}), 400
     try:
