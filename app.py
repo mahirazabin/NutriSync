@@ -93,27 +93,6 @@ def search_recipes_api():
     ]
     return jsonify(recipes)
 
-# Return all of the recipes created by that user (created only for now)
-# @app.route('/api/user/recipes')
-# @login_required
-# @roles_required(3)
-# def user_recipes_api():
-#     user_id = session.get('user_id')
-#     if not user_id:
-#         return jsonify({'error': 'Not logged in'}), 401
-
-#     rows = db.get_recipes_by_user(user_id)
-#     recipes = [{
-#         'RecipeID':      row[0],
-#         'Title':         row[1],
-#         'Description':   row[2],
-#         'TimeStamp':     row[3].isoformat() if hasattr(row[3], 'isoformat') else row[3],
-#         'Serving_Size':  row[4],
-#         'TotalCalories': row[5],
-#         'ImageURL':      row[6],
-#     } for row in rows]
-
-#     return jsonify(recipes), 200
 
 @app.route('/api/recipes/pending')
 @login_required

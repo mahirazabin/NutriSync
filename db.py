@@ -15,33 +15,6 @@ def get_connection():
         port=result.port
     )
     
-# def create_admin(admin_id, name, email, password):
-#     try:
-#         conn = get_connection()
-#         cursor = conn.cursor()
-#         query = "INSERT INTO Admin VALUES (%s, %s, %s, %s);"
-#         cursor.execute(query, (admin_id, name, email, password))
-#         conn.commit()
-#         cursor.close()
-#         conn.close()
-#     except Exception as e:
-#         print(f"Create Admin Error: {e}")  
-    
-# def update_admin(admin_id, name, email, password):
-#     try:
-#         conn = get_connection()
-#         cursor = conn.cursor()
-#         query = """
-#             UPDATE Admin
-#             SET Name = %s, Email = %s, Password = %s
-#             WHERE AdminID = %s;
-#         """
-#         cursor.execute(query, (name, email, password, admin_id))
-#         conn.commit()
-#         cursor.close()
-#         conn.close()
-#     except Exception as e:
-#         print(f"Update Admin Error: {e}")
 
 def create_user(name, email, phone_no, password, aid, user_flag):
     try:
@@ -76,23 +49,6 @@ def get_user(userid):
         print(f"Get User Error: {e}")
         return None
     
-# def get_users_by_role(role):
-#     try:
-#         conn = get_connection()
-#         cursor = conn.cursor()
-#         query = """
-#             SELECT userid, name, email, phone_no, aid
-#             FROM "user"
-#             WHERE userflag = %s;
-#         """
-#         cursor.execute(query, (role,))
-#         result = cursor.fetchall()
-#         cursor.close()
-#         conn.close()
-#         return result
-#     except Exception as e:
-#         print(f"Get Users by Role Error: {e}")
-#         return []
 
 
 def delete_user(userid):
@@ -366,35 +322,11 @@ def get_all_ingredients():
         print(f"get_all_ingredients Error: {e}")
         return []
 
-       
-# def select_ingredients(ingredient_id):
-#     try:
-#         conn = get_connection()
-#         cursor = conn.cursor()
-#         query = "SELECT Name, Calories, Unit FROM Ingredient WHERE IngredientID = %s;"
-#         cursor.execute(query, (ingredient_id,))
-#         result = cursor.fetchone()
-#         cursor.close()
-#         conn.close()
-#         return result
-#     except Exception as e:
-#         print(f"approve_recipe Error: {e}")
 
 def create_ingredient(name , calories, unit, userID):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-
-        # For testing purposes, this is commented out
-        # user = get_user(userID)
-        # if user[-1] == 1:
-        #     query = """
-        #         INSERT INTO ingredient (name, calories, unit, moderatorid)
-        #         VALUES (%s, %s, %s, %s);
-        #     """
-        #     cursor.execute(query, (name, calories, unit, userID))
-        # else:
-        #     print("Access Denied: User is not an admin")
             
         query = """
                 INSERT INTO ingredient (name, calories, unit, moderatorid)
@@ -439,15 +371,6 @@ def reject_recipe(recipe_id: int) -> None:
         conn.close()
     except Exception as e:
         print(f"reject_recipe Error: {e}")
-
-# def select_category(category_id):
-#     try:
-#         conn = get_connection()
-#         cursor = conn.cursor()
-#         query = "SELECT Name FROM Category WHERE CategoryID = %s;"
-#         cursor.execute(query, (category_id,))
-#         print(f"View Ingredient Error: {e}")
-#         print(f"View Ingredient Error: {e}")
     
 def remove_recipe_from_tracker(userID, recipeID):
     try:
@@ -489,16 +412,6 @@ def delete_ingredient(ingredientID, userID):
         conn = get_connection()
         cursor = conn.cursor()
         
-        # For testing...
-        # user = get_user(userID)
-        # if user[-1] == 1:
-        #     query = """
-        #         DELETE FROM ingredient
-        #         WHERE ingredientid = %s;
-        #     """
-        #     cursor.execute(query, (ingredientID,))
-        # else:
-        #     print("Access Denied: User is not an admin")
         query = """
                 DELETE FROM ingredient
                 WHERE ingredientid = %s;
@@ -671,17 +584,6 @@ def create_category(name , userID):
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Testing.......
-        # user = get_user(userID)
-        # print(type(user))
-        # if user[-1] == 1:
-        #     query = """
-        #         INSERT INTO category (name, moderatorid)
-        #         VALUES (%s, %s);
-        #     """
-        #     cursor.execute(query, (name, userID))
-        # else:
-        #     print("Access Denied: User is not an admin")
         
         query = """
                 INSERT INTO category (name, moderatorid)
@@ -699,16 +601,6 @@ def delete_category(categoryID, userID):
         conn = get_connection()
         cursor = conn.cursor()
         
-        # Testing...
-        # user = get_user(userID)
-        # if user[-1] == 1:
-        #     query = """
-        #         DELETE FROM category
-        #         WHERE categoryid = %s;
-        #     """
-        #     cursor.execute(query, (categoryID,))
-        # else:
-        #     print("Access Denied: User is not an admin")
         query = """
                 DELETE FROM category
                 WHERE categoryid = %s;
@@ -736,23 +628,6 @@ def get_all_category():
         return result
     except Exception as e:
         print(f"View Category Error: {e}")
-
-# def get_category_by_id(category_id):
-#     try:
-#         conn = get_connection()
-#         cursor = conn.cursor()
-#         query = "SELECT Name FROM Category WHERE CategoryID = %s;"
-#         cursor.execute(query, (category_id,))
-#         result = cursor.fetchone()
-#         cursor.close()
-#         conn.close()
-#         return result
-#     except Exception as e:
-#         print(f"Select Category Error: {e}")
-#         return None
-
-# def approve_recipe(recipe_id, approved_mod_id, approved_status):
-#         print(f"View Category Error: {e}")
 
 def get_categories_for_recipe(recipe_id):
     try:
