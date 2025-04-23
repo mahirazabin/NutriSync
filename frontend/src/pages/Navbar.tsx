@@ -26,12 +26,6 @@ export default function Navbar() {
         >
           Login
         </Link>
-        <Link
-          to="/moderator"
-          className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition"
-        >
-          Moderator
-        </Link>
       </div>
     </nav>
   );

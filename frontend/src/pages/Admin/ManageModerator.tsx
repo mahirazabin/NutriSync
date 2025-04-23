@@ -6,17 +6,23 @@ const ManageModerator: React.FC = () => {
   const navigate = useNavigate();
   const [moderators, setModerators] = useState<any[]>([]);
   const [selectedUserIDs, setSelectedUserIDs] = useState<string[]>([]);
+  const [banner, setBanner] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const fetchModerator = async () => {
-    try{
+    try {
       const res = await fetch(`/api/admin/${id}/manage-moderator/`);
       const data = await res.json();
-        if (data[0] != null){
-          setModerators(data);
-        }
-    }catch(err) {
-      alert('Failed to fetch moderators');
+      if (data[0] != null) {
+        setModerators(data);
+      }
+    } catch (err) {
+      showBanner('Failed to fetch moderators', 'error');
     }
+  };
+
+  const showBanner = (message: string, type: 'success' | 'error') => {
+    setBanner({ message, type });
+    setTimeout(() => setBanner(null), 3000);
   };
 
   useEffect(() => {
@@ -31,19 +37,20 @@ const ManageModerator: React.FC = () => {
     );
   };
 
-  const handleBulkAction = async (
-    action: 'blacklist' | 'unassign'
-  ) => {
-    await fetch(`/api/admin/${id}/${action}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_ids: selectedUserIDs }),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        alert(`${action} action applied to selected users`);
-      })
-      .catch(() => alert(`Failed to ${action} users`));
+  const handleBulkAction = async (action: 'blacklist' | 'unassign') => {
+    try {
+      const res = await fetch(`/api/admin/${id}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_ids: selectedUserIDs }),
+      });
+
+      if (!res.ok) throw new Error('Action failed');
+      showBanner(`${action} action successful`, 'success');
+    } catch {
+      showBanner(`Failed to ${action} users`, 'error');
+    }
+
     fetchModerator();
     setSelectedUserIDs([]);
   };
@@ -54,6 +61,7 @@ const ManageModerator: React.FC = () => {
         <div className="text-2xl font-extrabold text-blue-700">NutriSync</div>
         <div className="text-2xl font-extrabold text-blue-700">Admin</div>
       </nav>
+
       <div className="flex justify-start px-4 mt-4">
         <button
           onClick={() => navigate(`/admin/${id}`)}
@@ -62,6 +70,17 @@ const ManageModerator: React.FC = () => {
           ← Back to Home
         </button>
       </div>
+
+      {banner && (
+        <div
+          className={`mx-8 my-4 p-4 rounded-md text-white font-medium shadow-lg transition ${
+            banner.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          }`}
+        >
+          {banner.message}
+        </div>
+      )}
+
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
@@ -79,34 +98,29 @@ const ManageModerator: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-              {moderators.length === 0 ? (
+                {moderators.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-center py-6 text-gray-500">No Moderators Found.</td>
+                    <td colSpan={4} className="text-center py-6 text-gray-500">
+                      No Moderators Found.
+                    </td>
                   </tr>
                 ) : (
-                moderators.map((moderator) => (
-                  <tr
-                    key={moderator.userID}
-                    className="hover:bg-blue-50 transition"
-                  >
-                    <td className="px-4 py-2 border text-center">
-                      <input
-                        type="checkbox"
-                        className="accent-blue-600 w-4 h-4"
-                        checked={selectedUserIDs.includes(
-                          moderator.userID
-                        )}
-                        onChange={() =>
-                          handleSelect(moderator.userID)
-                        }
-                      />
-                    </td>
-                    <td className="px-4 py-2 border">{moderator.userID}</td>
-                    <td className="px-4 py-2 border">{moderator.name}</td>
-                    <td className="px-4 py-2 border">{moderator.email}</td>
-                  </tr>
-                )))
-              }
+                  moderators.map((moderator) => (
+                    <tr key={moderator.userID} className="hover:bg-blue-50 transition">
+                      <td className="px-4 py-2 border text-center">
+                        <input
+                          type="checkbox"
+                          className="accent-blue-600 w-4 h-4"
+                          checked={selectedUserIDs.includes(moderator.userID)}
+                          onChange={() => handleSelect(moderator.userID)}
+                        />
+                      </td>
+                      <td className="px-4 py-2 border">{moderator.userID}</td>
+                      <td className="px-4 py-2 border">{moderator.name}</td>
+                      <td className="px-4 py-2 border">{moderator.email}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
